@@ -1,0 +1,6 @@
+.vscode
+build/
+**.txt
+**.json
+
+!data/basement1.txt
