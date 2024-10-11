@@ -1,6 +1,4 @@
 .vscode
 build/
-**.txt
+**.csv
 **.json
-
-!data/basement1.txt

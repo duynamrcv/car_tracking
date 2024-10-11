@@ -202,14 +202,14 @@ int main() {
     vector<pair<double, double>> trajectory = calc_spline_course(x, y, ds);
 
     // Save to a file
-    ofstream outFile("trajectory.txt");
+    ofstream outFile("trajectory.csv");
     if (outFile.is_open()) {
         outFile << "x,y\n";
         for (const auto& point : trajectory) {
             outFile << point.first << "," << point.second << "\n";
         }
         outFile.close();
-        cout << "Trajectory saved to 'trajectory.txt'" << endl;
+        cout << "Trajectory saved to 'trajectory.csv'" << endl;
     } else {
         cerr << "Unable to open file" << endl;
     }

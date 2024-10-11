@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # file_name = "basement1.txt"
     # timestamp, x, y, theta, gear = load_csv(file_name)
 
-    file_name = "trajectory.txt"
+    file_name = "trajectory.csv"
     df = pd.read_csv(file_name, sep=',')
     df = np.array(df)
     
