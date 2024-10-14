@@ -1,70 +1,49 @@
 #include "CubicSpline.h"
 
-CubicSpline::CubicSpline(const std::vector<double>& bx, const std::vector<double>& by)
-    : x_(bx),
-      y_(by)
+CubicSpline::CubicSpline() {}
+
+CubicSpline::~CubicSpline() {}
+
+std::vector<Eigen::Vector2d> CubicSpline::interpolate(const std::vector<Eigen::Vector2d>& points,
+                                                      double ds)
 {
-    assert(x_.size() == y_.size() && x_.size() > 1);
-    int n = x_.size() - 1;
-
-    std::vector<double> h(n), alpha(n), l(n + 1), mu(n + 1), z(n + 1);
-
-    // Step 1: Calculate h and alpha
-    for (int i = 0; i < n; i++)
+    std::vector<double> s = computeS(points);
+    std::vector<double> x, y;
+    for(int i = 0; i < points.size(); i++)
     {
-        h[i] = x_[i + 1] - x_[i];
-        assert(h[i] != 0);
+        x.push_back(points[i].x());
+        y.push_back(points[i].y());
     }
 
-    for (int i = 1; i < n; i++)
-    {
-        alpha[i] = (3 / h[i]) * (y_[i + 1] - y_[i]) - (3 / h[i - 1]) * (y[i] - y[i - 1]);
+    Spline1D sx(computeS(points), x);
+    Spline1D sy(computeS(points), y);
+    double maxS = s.back();
+
+    std::vector<Eigen::Vector2d> splinePoints;
+    for (double sVal = 0; sVal < maxS; sVal += ds) {
+        splinePoints.push_back(computePosition(sx, sy, sVal));
     }
-
-    // Step 2: Tridiagonal system setup
-    l[0]  = 1.0;
-    mu[0] = 0.0;
-    z[0]  = 0.0;
-
-    for (int i = 1; i < n; i++)
-    {
-        l[i]  = 2 * (x_[i + 1] - x_[i - 1]) - h[i - 1] * mu[i - 1];
-        mu[i] = h[i] / l[i];
-        z[i]  = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
-    }
-
-    l[n] = 1.0;
-    z[n] = 0.0;
-    a_.resize(n, 0.0);
-    b_.resize(n, 0.0);
-    c_.resize(n + 1, 0.0);
-    d_.resize(n, 0.0);
-
-    // Step 3: Back substitution
-    for (int j = n - 1; j >= 0; j--)
-    {
-        c_[j] = z[j] - mu[j] * c_[j + 1];
-        b_[j] = (y_[j + 1] - y_[j]) / h[j] - h[j] * (c_[j + 1] + 2 * c_[j]) / 3;
-        d_[j] = (c_[j + 1] - c_[j]) / (3 * h[j]);
-        a_[j] = y_[j];
-    }
+    return splinePoints;
 }
 
-double CubicSpline::evaluate(double xVal)
+std::vector<double> CubicSpline::computeS(const std::vector<Eigen::Vector2d>& points)
 {
-    int n = x_.size() - 1;
-    int i = n - 1;
-    
-    // Find the correct interval for x_val
-    for (int j = 0; j < n; j++)
+    // compute the cumulative arc length
+    std::vector<double> ds(points.size() - 1);
+    std::vector<double> sVal = {0};
+    for (size_t i = 1; i < points.size(); i++)
     {
-        if (xVal >= x[j] && xVal <= x[j + 1])
-        {
-            i = j;
-            break;
-        }
+        double dx = points[i].x() - points[i - 1].x();
+        double dy = points[i].y() - points[i - 1].y();
+        ds[i - 1] = hypot(dx, dy);
+        sVal.push_back(sVal.back() + ds[i - 1]);
     }
+    return sVal;
+}
 
-    double dx = xVal - x_[i];
-    return a_[i] + b_[i] * dx + c_[i] * dx * dx + d_[i] * dx * dx * dx;
+Eigen::Vector2d CubicSpline::computePosition(Spline1D& sx, Spline1D& sy, double sVal)
+{
+    double x = sx.compute(sVal);
+    double y = sy.compute(sVal);
+    return Eigen::Vector2d(x, y);
 }

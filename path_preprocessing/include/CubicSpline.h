@@ -1,25 +1,17 @@
 #pragma once
 
-#include <cassert>
-#include <cmath>
-#include <vector>
+#include "Spline.h"
+#include "Spline1D.h"
 
-class CubicSpline
+class CubicSpline : public Spline
 {
 public:
-    CubicSpline(const std::vector<double>& bx, const std::vector<double>& by);
-    ~CubicSpline(){};
+    CubicSpline();
+    ~CubicSpline();
 
-    // Function to evaluate the spline at a given xVal
-    double evaluate(double xVal);
-
-    // Function to evaluate the derivative (velocity) of the spline at a given xVal
-    double derivative(double xVal);
-
-    // Generate trajectory points with distance ds
-    std::vector<std::pair<double, double>> generateTrajectory(double ds);
+    std::vector<Eigen::Vector2d> interpolate(const std::vector<Eigen::Vector2d>& points, double ds);
 
 private:
-    std::vector<double> x_, y_;          // Input points
-    std::vector<double> a_, b_, c_, d_;  // Spline coefficients
+    std::vector<double> computeS(const std::vector<Eigen::Vector2d>& points);
+    Eigen::Vector2d computePosition(Spline1D& sx, Spline1D& sy, double sVal);
 };
