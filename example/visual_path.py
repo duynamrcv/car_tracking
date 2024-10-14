@@ -25,20 +25,25 @@ def load_csv(file_name):
     return timestamp, x, y, theta, gear
 
 if __name__ == "__main__":
-    # file_name = "basement1.txt"
-    # timestamp, x, y, theta, gear = load_csv(file_name)
+    file_name = "data/basement1.txt"
+    timestamp, bx, by, theta, gear = load_csv(file_name)
 
-    file_name = "trajectory.csv"
+    file_name = "data/trajectory0.csv"
     df = pd.read_csv(file_name, sep=',')
     df = np.array(df)
     
     x = df[:,0]
     y = df[:,1]
 
-    bx = [0.0, -3.5, 2.0, 10.0, 3.0, 5.0, -2.0]
-    by = [0.0, 2.0, -1.5, 5.0, 5.0, 10.0, 3.0]
+    file_name = "data/trajectory1.csv"
+    df = pd.read_csv(file_name, sep=',')
+    df = np.array(df)
+    
+    cx = df[:,0]
+    cy = df[:,1]
 
     plt.figure()
-    plt.plot(bx, by, "xb")
-    plt.plot(x, y, "-or")
+    plt.plot(bx, by, "xb", label="basement")
+    plt.plot(x, y, "-or", label="BSpline")
+    plt.plot(cx, cy, "-og", label="Cubic Spline")
     plt.show()
