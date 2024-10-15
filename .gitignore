@@ -2,3 +2,5 @@
 build/
 **.csv
 **.json
+**/__pycache__
+**/c_generated_code
