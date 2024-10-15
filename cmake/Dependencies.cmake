@@ -4,5 +4,6 @@ set (VENDOR_PREFIX ${CMAKE_SOURCE_DIR}/vendor)
 
 vendor_add(SPDLOG)
 vendor_add(EIGEN)
+vendor_add(ACADOS)
 # vendor_add(OPENCV)
 # vendor_add(JSON)
