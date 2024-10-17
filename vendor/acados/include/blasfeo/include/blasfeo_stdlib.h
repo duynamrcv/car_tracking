@@ -44,6 +44,7 @@ extern "C" {
 
 #include <stdlib.h>
 
+#ifdef EXT_DEP
 //
 void blasfeo_malloc(void **ptr, size_t size);
 //
@@ -52,6 +53,7 @@ void blasfeo_malloc_align(void **ptr, size_t size);
 void blasfeo_free(void *ptr);
 //
 void blasfeo_free_align(void *ptr);
+#endif
 
 
 

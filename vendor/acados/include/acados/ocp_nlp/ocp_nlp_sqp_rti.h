@@ -53,6 +53,29 @@ extern "C" {
  * options
  ************************************************/
 
+typedef enum
+{
+    PREPARATION_AND_FEEDBACK, // = 0,
+    PREPARATION, // = 1,
+    FEEDBACK, // = 2,
+} rti_phase_t;
+
+typedef enum
+{
+    SHIFT_ADVANCE, // = 0,
+    SIMULATE_ADVANCE, // = 1,
+    NO_ADVANCE, // = 2,
+} as_rti_advancement_strategy_t;
+
+typedef enum
+{
+    LEVEL_A, // 0
+    LEVEL_B, // 1
+    LEVEL_C, // 2
+    LEVEL_D, // 3
+    STANDARD_RTI, // 4
+} as_rti_level_t;
+
 typedef struct
 {
     ocp_nlp_opts *nlp_opts;
@@ -60,7 +83,11 @@ typedef struct
     int ext_qp_res;           // compute external QP residuals (i.e. at SQP level) at each SQP iteration (for debugging)
     int qp_warm_start;        // NOTE: this is not actually setting the warm_start! Just for compatibility with sqp.
     bool warm_start_first_qp; // to set qp_warm_start in first iteration
-    int rti_phase;            // phase of RTI. Possible values 1 (preparation), 2 (feedback) 0 (both)
+    rti_phase_t rti_phase;
+    as_rti_level_t as_rti_level;
+    as_rti_advancement_strategy_t as_rti_advancement_strategy;
+    int as_rti_iter;
+    int rti_log_residuals;
 
 } ocp_nlp_sqp_rti_opts;
 
@@ -89,21 +116,12 @@ typedef struct
     // nlp memory
     ocp_nlp_memory *nlp_mem;
 
-    double time_qp_sol;
-    double time_qp_solver_call;
-    double time_qp_xcond;
-    double time_lin;
-    double time_reg;
-    double time_tot;
-    double time_glob;
-    double time_solution_sensitivities;
-
     // statistics
     double *stat;
     int stat_m;
     int stat_n;
 
-    int status;
+    bool is_first_call;
 
 } ocp_nlp_sqp_rti_memory;
 
@@ -123,14 +141,9 @@ typedef struct
 {
     ocp_nlp_workspace *nlp_work;
 
-    // temp QP in & out (to be used as workspace in param sens)
-    ocp_qp_in *tmp_qp_in;
-    ocp_qp_out *tmp_qp_out;
-
     // qp residuals
     ocp_qp_res *qp_res;
     ocp_qp_res_ws *qp_res_ws;
-
 
 } ocp_nlp_sqp_rti_workspace;
 
@@ -150,7 +163,9 @@ void ocp_nlp_sqp_rti_config_initialize_default(void *config_);
 //
 int ocp_nlp_sqp_rti_precompute(void *config_, void *dims_,
     void *nlp_in_, void *nlp_out_, void *opts_, void *mem_, void *work_);
-
+//
+void ocp_nlp_sqp_rti_eval_lagr_grad_p(void *config_, void *dims_, void *nlp_in_, void *opts_,
+    void *mem_, void *work_, const char *field, void *grad_p);
 
 
 #ifdef __cplusplus

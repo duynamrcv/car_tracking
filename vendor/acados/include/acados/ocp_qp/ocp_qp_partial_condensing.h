@@ -64,6 +64,8 @@ typedef struct ocp_qp_partial_condensing_opts_
     int N2;
     int N2_bkp;
 //    int expand_dual_sol; // 0 primal sol only, 1 primal + dual sol
+    int *block_size;
+    bool block_size_was_set;
     int ric_alg;
     int mem_qp_in; // allocate qp_in in memory
 } ocp_qp_partial_condensing_opts;
@@ -106,6 +108,10 @@ void *ocp_qp_partial_condensing_memory_assign(void *dims, void *opts, void *raw_
 acados_size_t ocp_qp_partial_condensing_workspace_calculate_size(void *dims, void *opts_);
 //
 int ocp_qp_partial_condensing(void *in, void *out, void *opts, void *mem, void *work);
+//
+int ocp_qp_partial_condensing_condense_lhs(void *in, void *out, void *opts, void *mem, void *work);
+//
+int ocp_qp_partial_condensing_condense_rhs(void *in, void *out, void *opts, void *mem, void *work);
 //
 int ocp_qp_partial_expansion(void *in, void *out, void *opts, void *mem, void *work);
 //

@@ -95,6 +95,7 @@ typedef struct
     struct blasfeo_dvec z;              // gradient of slacks as vector
     double scaling;
     double t; // time (always zero) to match signature of external function wrt cost integration
+    double outer_hess_is_diag;    // flag indicating if outer_hess_is_diag; Note: double for compatibility with CONL cost
     int W_changed;                      ///< flag indicating whether W has changed and needs to be refactorized
 } ocp_nlp_cost_nls_model;
 
@@ -137,11 +138,11 @@ void ocp_nlp_cost_nls_opts_set(void *config, void *opts, const char *field, void
 typedef struct
 {
     struct blasfeo_dmat W_chol;  // cholesky factor of weight matrix
+    struct blasfeo_dvec W_chol_diag;  // cholesky factor of weight matrix if the Hessian is diagonal
     struct blasfeo_dmat Jt;      // jacobian of nls fun
     struct blasfeo_dvec res;     // nls residual r(x)
     struct blasfeo_dvec grad;    // gradient of cost function
     struct blasfeo_dvec *ux;     // pointer to ux in nlp_out
-    struct blasfeo_dvec *tmp_ux;     // pointer to ux in tmp_nlp_out
     struct blasfeo_dmat *RSQrq;  // pointer to RSQrq in qp_in
     struct blasfeo_dvec *Z;      // pointer to Z in qp_in
     struct blasfeo_dvec *z_alg;         ///< pointer to z in sim_out
@@ -160,13 +161,13 @@ struct blasfeo_dvec *ocp_nlp_cost_nls_memory_get_grad_ptr(void *memory_);
 //
 struct blasfeo_dmat *ocp_nlp_cost_nls_memory_get_W_chol_ptr(void *memory_);
 //
+struct blasfeo_dvec *ocp_nlp_cost_nls_memory_get_W_chol_diag_ptr(void *memory_);
+//
 void ocp_nlp_cost_nls_memory_set_RSQrq_ptr(struct blasfeo_dmat *RSQrq, void *memory);
 //
 void ocp_nlp_cost_nls_memory_set_Z_ptr(struct blasfeo_dvec *Z, void *memory);
 //
 void ocp_nlp_cost_nls_memory_set_ux_ptr(struct blasfeo_dvec *ux, void *memory_);
-//
-void ocp_nlp_cost_nls_memory_set_tmp_ux_ptr(struct blasfeo_dvec *tmp_ux, void *memory_);
 //
 void ocp_nlp_cost_nls_memory_set_z_alg_ptr(struct blasfeo_dvec *z_alg, void *memory_);
 //
@@ -197,13 +198,18 @@ acados_size_t ocp_nlp_cost_nls_workspace_calculate_size(void *config, void *dims
 //
 void ocp_nlp_cost_nls_precompute(void *config_, void *dims_, void *model_, void *opts_, void *memory_, void *work_);
 //
-void ocp_nlp_cost_nls_config_initialize_default(void *config);
+void ocp_nlp_cost_nls_config_initialize_default(void *config, int stage);
 //
 void ocp_nlp_cost_nls_initialize(void *config_, void *dims, void *model_, void *opts_, void *mem_, void *work_);
 //
 void ocp_nlp_cost_nls_update_qp_matrices(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_);
 //
-void ocp_nlp_cost_nls_compute_fun(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_);
+void ocp_nlp_cost_nls_compute_fun(void *config_, void *dims, void *model_, void *opts_,
+                                  void *memory_, void *work_);
+//
+void ocp_nlp_cost_nls_compute_jac_p(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_);
+//
+void ocp_nlp_cost_nls_eval_grad_p(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_, struct blasfeo_dvec *out);
 
 #ifdef __cplusplus
 } /* extern "C" */

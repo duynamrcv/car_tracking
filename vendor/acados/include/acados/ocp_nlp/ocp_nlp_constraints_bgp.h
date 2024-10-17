@@ -134,10 +134,9 @@ typedef struct
     struct blasfeo_dvec adj;
     struct blasfeo_dvec constr_eval_no_bounds;
     struct blasfeo_dvec *ux;     // pointer to ux in nlp_out
-    struct blasfeo_dvec *tmp_ux; // pointer to ux in tmp_nlp_out
     struct blasfeo_dvec *lam;    // pointer to lam in nlp_out
-    struct blasfeo_dvec *tmp_lam;// pointer to lam in tmp_nlp_out
     struct blasfeo_dvec *z_alg;  // pointer to z_alg in ocp_nlp memory
+    struct blasfeo_dvec *dmask;  // pointer to dmask in qp_in
     struct blasfeo_dmat *DCt;    // pointer to DCt in qp_in
     struct blasfeo_dmat *RSQrq;  // pointer to RSQrq in qp_in
     struct blasfeo_dmat *dzduxt; // pointer to dzduxt in ocp_nlp memory
@@ -158,15 +157,13 @@ struct blasfeo_dvec *ocp_nlp_constraints_bgp_memory_get_adj_ptr(void *memory_);
 //
 void ocp_nlp_constraints_bgp_memory_set_ux_ptr(struct blasfeo_dvec *ux, void *memory_);
 //
-void ocp_nlp_constraints_bgp_memory_set_tmp_ux_ptr(struct blasfeo_dvec *tmp_ux, void *memory_);
-//
 void ocp_nlp_constraints_bgp_memory_set_lam_ptr(struct blasfeo_dvec *lam, void *memory_);
-//
-void ocp_nlp_constraints_bgp_memory_set_tmp_lam_ptr(struct blasfeo_dvec *tmp_lam, void *memory_);
 //
 void ocp_nlp_constraints_bgp_memory_set_DCt_ptr(struct blasfeo_dmat *DCt, void *memory);
 //
 void ocp_nlp_constraints_bgp_memory_set_z_alg_ptr(struct blasfeo_dvec *z_alg, void *memory_);
+//
+void ocp_nlp_constraints_bgp_memory_set_dmask_ptr(struct blasfeo_dvec *dmask, void *memory_);
 //
 void ocp_nlp_constraints_bgp_memory_set_dzduxt_ptr(struct blasfeo_dmat *dzduxt, void *memory_);
 //
@@ -194,7 +191,7 @@ acados_size_t ocp_nlp_constraints_bgp_workspace_calculate_size(void *config, voi
 /* functions */
 
 //
-void ocp_nlp_constraints_bgp_config_initialize_default(void *config);
+void ocp_nlp_constraints_bgp_config_initialize_default(void *config, int stage);
 //
 void ocp_nlp_constraints_bgp_initialize(void *config, void *dims, void *model,
         void *opts, void *mem, void *work);

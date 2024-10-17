@@ -47,6 +47,8 @@
 extern "C" {
 #endif
 
+#include <math.h>
+
 // blasfeo
 #include "blasfeo/include/blasfeo_common.h"
 
@@ -109,6 +111,7 @@ typedef struct
     struct blasfeo_dvec Z;              ///< diagonal Hessian of slacks as vector (lower and upper)
     struct blasfeo_dvec z;              ///< gradient of slacks as vector (lower and upper)
     double scaling;
+    double outer_hess_is_diag;
     int W_changed;                      ///< flag indicating whether W has changed and needs to be refactorized
     int Cyt_or_scaling_changed;         ///< flag indicating whether Cyt or scaling has changed and Hessian needs to be recomputed
 } ocp_nlp_cost_ls_model;
@@ -131,7 +134,7 @@ int ocp_nlp_cost_ls_model_set(void *config_, void *dims_, void *model_,
 
 typedef struct
 {
-    int dummy; // struct can't be void
+    int compute_hess;
 } ocp_nlp_cost_ls_opts;
 
 //
@@ -159,10 +162,10 @@ typedef struct
 {
     struct blasfeo_dmat hess;           ///< hessian of cost function
     struct blasfeo_dmat W_chol;         ///< cholesky factor of weight matrix
+    struct blasfeo_dvec W_chol_diag;    ///< W_chol_diag
     struct blasfeo_dvec res;            ///< ls residual r(x)
     struct blasfeo_dvec grad;           ///< gradient of cost function
     struct blasfeo_dvec *ux;            ///< pointer to ux in nlp_out
-    struct blasfeo_dvec *tmp_ux;        ///< pointer to ux in tmp_nlp_out
     struct blasfeo_dvec *z_alg;         ///< pointer to z in sim_out
     struct blasfeo_dmat *dzdux_tran;    ///< pointer to sensitivity of a wrt ux in sim_out
     struct blasfeo_dmat *RSQrq;         ///< pointer to RSQrq in qp_in
@@ -184,8 +187,6 @@ void ocp_nlp_cost_ls_memory_set_RSQrq_ptr(struct blasfeo_dmat *RSQrq, void *memo
 void ocp_nlp_cost_ls_memory_set_Z_ptr(struct blasfeo_dvec *Z, void *memory);
 //
 void ocp_nlp_cost_ls_memory_set_ux_ptr(struct blasfeo_dvec *ux, void *memory_);
-//
-void ocp_nlp_cost_ls_memory_set_tmp_ux_ptr(struct blasfeo_dvec *tmp_ux, void *memory_);
 //
 void ocp_nlp_cost_ls_memory_set_z_alg_ptr(struct blasfeo_dvec *z_alg, void *memory_);
 //
@@ -223,7 +224,7 @@ acados_size_t ocp_nlp_cost_ls_workspace_calculate_size(void *config, void *dims,
 // computations that are done once when solver is created
 void ocp_nlp_cost_ls_precompute(void *config_, void *dims_, void *model_, void *opts_, void *memory_, void *work_);
 //
-void ocp_nlp_cost_ls_config_initialize_default(void *config);
+void ocp_nlp_cost_ls_config_initialize_default(void *config, int stage);
 //
 void ocp_nlp_cost_ls_initialize(void *config_, void *dims, void *model_, void *opts_,
                                 void *mem_, void *work_);
@@ -231,7 +232,12 @@ void ocp_nlp_cost_ls_initialize(void *config_, void *dims, void *model_, void *o
 void ocp_nlp_cost_ls_update_qp_matrices(void *config_, void *dims, void *model_,
                                         void *opts_, void *memory_, void *work_);
 //
-void ocp_nlp_cost_ls_compute_fun(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_);
+void ocp_nlp_cost_ls_compute_fun(void *config_, void *dims, void *model_, void *opts_,
+                                 void *memory_, void *work_);
+//
+void ocp_nlp_cost_ls_compute_jac_p(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_);
+//
+void ocp_nlp_cost_ls_eval_grad_p(void *config_, void *dims, void *model_, void *opts_, void *memory_, void *work_, struct blasfeo_dvec *out);
 
 #ifdef __cplusplus
 } /* extern "C" */

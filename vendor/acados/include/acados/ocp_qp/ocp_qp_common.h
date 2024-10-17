@@ -72,6 +72,7 @@ typedef struct
     void (*solver_get)(void *config_, void *qp_in_, void *qp_out_, void *opts_, void *mem_, const char *field, int stage, void* value, int size1, int size2);
     void (*memory_reset)(void *config, void *qp_in, void *qp_out, void *opts, void *mem, void *work);
     void (*eval_sens)(void *config, void *qp_in, void *qp_out, void *opts, void *mem, void *work);
+    void (*terminate)(void *config, void *mem, void *work);
 } qp_solver_config;
 #endif
 
@@ -94,7 +95,8 @@ typedef struct
     void (*memory_get)(void *config, void *mem, const char *field, void* value);
     acados_size_t (*workspace_calculate_size)(void *dims, void *opts);
     int (*condensing)(void *qp_in, void *qp_out, void *opts, void *mem, void *work);
-    int (*condensing_rhs)(void *qp_in, void *qp_out, void *opts, void *mem, void *work);
+    int (*condense_rhs)(void *qp_in, void *qp_out, void *opts, void *mem, void *work);
+    int (*condense_lhs)(void *qp_in, void *qp_out, void *opts, void *mem, void *work);
     int (*expansion)(void *qp_in, void *qp_out, void *opts, void *mem, void *work);
 } ocp_qp_xcond_config;
 
@@ -150,6 +152,8 @@ ocp_qp_in *ocp_qp_in_assign(ocp_qp_dims *dims, void *raw_memory);
 acados_size_t ocp_qp_out_calculate_size(ocp_qp_dims *dims);
 //
 ocp_qp_out *ocp_qp_out_assign(ocp_qp_dims *dims, void *raw_memory);
+//
+double ocp_qp_out_compute_primal_nrm_inf(ocp_qp_out* qp_out);
 
 /* res */
 //
@@ -164,6 +168,7 @@ ocp_qp_res_ws *ocp_qp_res_workspace_assign(ocp_qp_dims *dims, void *raw_memory);
 void ocp_qp_res_compute(ocp_qp_in *qp_in, ocp_qp_out *qp_out, ocp_qp_res *qp_res, ocp_qp_res_ws *res_ws);
 //
 void ocp_qp_res_compute_nrm_inf(ocp_qp_res *qp_res, double res[4]);
+
 
 
 /* misc */
