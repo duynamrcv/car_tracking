@@ -37,7 +37,7 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
 
 // Function to save trajectory to CSV file
 void saveToCSV(const std::string& filename,
-               const std::vector<std::tuple<double, double, double>>& motionPath)
+               const std::vector<Pose>& motionPath)
 {
     std::ofstream file(filename);
 
@@ -46,7 +46,7 @@ void saveToCSV(const std::string& filename,
         file << "x,y,yaw\n";  // CSV header
         for (const auto& p : motionPath)
         {
-            file << std::get<0>(p) << "," << std::get<1>(p) << "," << std::get<2>(p) << "\n";
+            file << p.x << "," << p.y << "," << p.yaw << "\n";
         }
         file.close();
         std::cout << "Trajectory saved to " << filename << std::endl;
@@ -56,35 +56,6 @@ void saveToCSV(const std::string& filename,
         std::cerr << "Unable to open file: " << filename << std::endl;
     }
 }
-
-class Car
-{
-public:
-    Car(double x_, double y_, double yaw_)
-    {
-        x   = x_;
-        y   = y_;
-        yaw = yaw_;
-    }
-
-    ~Car(){};
-
-    void updateState(const ControlSignal& signal, double dt)
-    {
-        x += signal.speed * cos(yaw) * dt;
-        y += signal.speed * sin(yaw) * dt;
-        yaw += signal.speed * tan(signal.steering) / wheelbase_ * dt;
-
-        std::tuple<double, double, double> state(x, y, yaw);
-        motionPath.push_back(state);
-    }
-
-    double x, y, yaw;
-    std::vector<std::tuple<double, double, double>> motionPath;
-
-private:
-    double wheelbase_ = 2.95;
-};
 
 void getLocalTrajectory(const std::vector<std::tuple<double, double, double>>& points, int iter,
                         std::vector<WayPoint>& localTrajectory)
@@ -136,7 +107,7 @@ int main(int argc, char** argv)
         getLocalTrajectory(points, i, localTrajectory);
 
         // Solve
-        double currentState[3] = {car.x, car.y, car.yaw};
+        double currentState[3] = {car.pose.x, car.pose.y, car.pose.yaw};
         ControlSignal signal;
         int success = controller.solve(currentState, localTrajectory, signal);
 

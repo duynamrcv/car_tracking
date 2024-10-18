@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include "CarModel.h"
 
 // acados
 #include "acados/utils/math.h"
@@ -22,23 +23,6 @@
 #define NBX0 CARMODEL_NBX0
 #define N    CARMODEL_N
 #define NBU  CARMODEL_NBU
-
-struct WayPoint
-{
-    double x;
-    double y;
-    double yaw;
-    double v;
-    double steer;
-};
-
-struct ControlSignal
-{
-    double speed;
-    double steering;
-    double accel;
-    int gear;  // -1, 0, 1: backward, neutral, forward
-};
 
 class Controller
 {
