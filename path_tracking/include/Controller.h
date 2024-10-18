@@ -18,8 +18,10 @@
 #define NX   CARMODEL_NX
 #define NP   CARMODEL_NP
 #define NU   CARMODEL_NU
+#define NY   CARMODEL_NY
 #define NBX0 CARMODEL_NBX0
 #define N    CARMODEL_N
+#define NBU  CARMODEL_NBU
 
 struct WayPoints
 {
@@ -44,9 +46,9 @@ public:
     Controller();
     ~Controller();
 
-    void setContraints();
-    void setWeights();
-    void setParmeters();
+    void setContraints(double maxV, double minV, double maxSteering, double minSteering);
+    void setWeights(const double weight[NY]);
+    void setParmeters(double wheelbase);
 
     int solve(const double currentState[3], const std::vector<WayPoints> localTrajectory,
               ControlSignal &signal);
@@ -60,5 +62,7 @@ private:
     ocp_nlp_solver *nlp_solver;
     void *nlp_opts;
 
-    double wheelbase_;
+    double parameter[NP];  // Parameter
+    double *W_, *W_e_;     // Weight
+    double *lbu, *ubu;     // Constraint
 };

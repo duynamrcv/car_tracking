@@ -1,5 +1,6 @@
 #include "Controller.h"
 #include <iostream>
+#include <cmath>
 
 Controller::Controller()
 {
@@ -22,7 +23,24 @@ Controller::Controller()
     nlp_solver = CarModel_acados_get_nlp_solver(acados_ocp_capsule);
     nlp_opts   = CarModel_acados_get_nlp_opts(acados_ocp_capsule);
 
-    setParmeters();
+    W_   = (double*)calloc(NY * NY, sizeof(double));
+    W_e_ = (double*)calloc(NX * NX, sizeof(double));
+
+    double* lubu = (double*)calloc(2 * NBU, sizeof(double));
+    lbu          = lubu;
+    ubu          = lubu + NBU;
+
+    // Fix parameter, edit to input config
+    double wheelbase   = 2.95;
+    double weight[NY]  = {100., 100., 0.01, 0.1, 0.1};
+    double maxV        = 1.5;
+    double minV        = 0.0;
+    double maxSteering = M_PI / 6;
+    double minSteering = -M_PI / 6;
+
+    setParmeters(wheelbase);
+    setWeights(weight);
+    setContraints(maxV, minV, maxSteering, minSteering);
 }
 
 Controller::~Controller()
@@ -41,13 +59,33 @@ Controller::~Controller()
     }
 }
 
-void Controller::setParmeters()
+void Controller::setParmeters(double wheelbase)
 {
-    wheelbase_ = 2.95;
+    parameter[0] = wheelbase;
 }
 
-void Controller::setContraints() {}
-void Controller::setWeights() {}
+void Controller::setContraints(double maxV, double minV, double maxSteering, double minSteering)
+{
+    lbu[0] = minV;
+    ubu[0] = maxV;
+    lbu[1] = minSteering;
+    ubu[1] = maxSteering;
+}
+
+void Controller::setWeights(const double weight[NY])
+{
+    // Set weight for W
+    W_[0 + (NY)*0] = weight[0];
+    W_[1 + (NY)*1] = weight[1];
+    W_[2 + (NY)*2] = weight[2];
+    W_[3 + (NY)*3] = weight[3];
+    W_[4 + (NY)*4] = weight[4];
+
+    // Set weight for W_e
+    W_e_[0 + (NX)*0] = weight[0];
+    W_e_[1 + (NX)*1] = weight[1];
+    W_e_[2 + (NX)*2] = weight[2];
+}
 
 int Controller::solve(const double currentState[3], const std::vector<WayPoints> localTrajectory,
                       ControlSignal& signal)
@@ -59,26 +97,33 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoints>
         exit(1);
     }
 
-    // set target states and parameters for each step
-    for (size_t i = 0; i < N; i++)
+    for (size_t i = 0; i <= N; i++)
     {
-        double state[NX + NU];
-        state[0] = localTrajectory[i].x;
-        state[1] = localTrajectory[i].y;
-        state[2] = localTrajectory[i].yaw;
-        state[3] = localTrajectory[i].v;
-        state[4] = localTrajectory[i].steer;
-        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "yref", state);
+        // set target states and costs
+        if (i < N)
+        {
+            double state[NX + NU];
+            state[0] = localTrajectory[i].x;
+            state[1] = localTrajectory[i].y;
+            state[2] = localTrajectory[i].yaw;
+            state[3] = localTrajectory[i].v;
+            state[4] = localTrajectory[i].steer;
+            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "yref", state);
+            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "W", W_);
+        }
+        else
+        {
+            double stateN[NX];
+            stateN[0] = localTrajectory[N - 1].x;
+            stateN[1] = localTrajectory[N - 1].y;
+            stateN[2] = localTrajectory[N - 1].yaw;
+            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "yref", stateN);
+            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "W", W_e_);
+        }
 
-        double parameter[NP] = {wheelbase_};
-        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "p", parameter);
+        // set parameters
+        CarModel_acados_update_params(acados_ocp_capsule, i, parameter, NP);
     }
-
-    double stateN[NX];
-    stateN[0] = localTrajectory[N - 1].x;
-    stateN[1] = localTrajectory[N - 1].y;
-    stateN[2] = localTrajectory[N - 1].yaw;
-    ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "yref", stateN);
 
     // set initial condition
     double initState[NX];

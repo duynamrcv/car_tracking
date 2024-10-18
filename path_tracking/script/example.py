@@ -56,10 +56,6 @@ def gen_2sub_path(x_ref, y_ref, psi_ref, dirs_ref):
         y_ref1.append(y_ref1[-1])
         psi_ref1.append(psi_ref1[-1])
         dirs_ref1.append(dirs_ref1[-1])
-        x_ref2.append(x_ref2[-1])
-        y_ref2.append(y_ref2[-1])
-        psi_ref2.append(psi_ref2[-1])
-        dirs_ref2.append(dirs_ref2[-1])
 
     return x_ref1, y_ref1, psi_ref1, dirs_ref1, x_ref2, y_ref2, psi_ref2, dirs_ref2
 
