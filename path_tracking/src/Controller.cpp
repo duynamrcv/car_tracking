@@ -1,14 +1,14 @@
 #include "Controller.h"
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 Controller::Controller()
 {
-    acados_ocp_capsule = CarModel_acados_create_capsule();
+    acadosOcpCapsule_ = CarModel_acados_create_capsule();
 
     // allocate the array and fill it accordingly
-    double* new_time_steps = NULL;
-    int status = CarModel_acados_create_with_discretization(acados_ocp_capsule, N, new_time_steps);
+    double* newTimeSteps = NULL;
+    int status = CarModel_acados_create_with_discretization(acadosOcpCapsule_, N, newTimeSteps);
 
     if (status)
     {
@@ -16,12 +16,12 @@ Controller::Controller()
         exit(1);
     }
 
-    nlp_config = CarModel_acados_get_nlp_config(acados_ocp_capsule);
-    nlp_dims   = CarModel_acados_get_nlp_dims(acados_ocp_capsule);
-    nlp_in     = CarModel_acados_get_nlp_in(acados_ocp_capsule);
-    nlp_out    = CarModel_acados_get_nlp_out(acados_ocp_capsule);
-    nlp_solver = CarModel_acados_get_nlp_solver(acados_ocp_capsule);
-    nlp_opts   = CarModel_acados_get_nlp_opts(acados_ocp_capsule);
+    nlpConfig_ = CarModel_acados_get_nlp_config(acadosOcpCapsule_);
+    nlpDims_   = CarModel_acados_get_nlp_dims(acadosOcpCapsule_);
+    nlpIn_     = CarModel_acados_get_nlp_in(acadosOcpCapsule_);
+    nlpOut_    = CarModel_acados_get_nlp_out(acadosOcpCapsule_);
+    nlpSolver_ = CarModel_acados_get_nlp_solver(acadosOcpCapsule_);
+    nlpOpts_   = CarModel_acados_get_nlp_opts(acadosOcpCapsule_);
 
     W_   = (double*)calloc(NY * NY, sizeof(double));
     W_e_ = (double*)calloc(NX * NX, sizeof(double));
@@ -46,13 +46,13 @@ Controller::Controller()
 Controller::~Controller()
 {
     // free solver
-    int status = CarModel_acados_free(acados_ocp_capsule);
+    int status = CarModel_acados_free(acadosOcpCapsule_);
     if (status)
     {
         std::cout << "CarModel_acados_free() returned status " << status << ".\n";
     }
     // free solver capsule
-    status = CarModel_acados_free_capsule(acados_ocp_capsule);
+    status = CarModel_acados_free_capsule(acadosOcpCapsule_);
     if (status)
     {
         std::cout << "CarModel_acados_free_capsule() returned status " << status << ".\n";
@@ -108,8 +108,8 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoints>
             state[2] = localTrajectory[i].yaw;
             state[3] = localTrajectory[i].v;
             state[4] = localTrajectory[i].steer;
-            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "yref", state);
-            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "W", W_);
+            ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "yref", state);
+            ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "W", W_);
         }
         else
         {
@@ -117,12 +117,12 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoints>
             stateN[0] = localTrajectory[N - 1].x;
             stateN[1] = localTrajectory[N - 1].y;
             stateN[2] = localTrajectory[N - 1].yaw;
-            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "yref", stateN);
-            ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "W", W_e_);
+            ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, N, "yref", stateN);
+            ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, N, "W", W_e_);
         }
 
         // set parameters
-        CarModel_acados_update_params(acados_ocp_capsule, i, parameter, NP);
+        CarModel_acados_update_params(acadosOcpCapsule_, i, parameter, NP);
     }
 
     // set initial condition
@@ -131,10 +131,10 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoints>
     {
         initState[i] = currentState[i];
     }
-    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "lbx", initState);
-    ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "ubx", initState);
+    ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, 0, "lbx", initState);
+    ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, 0, "ubx", initState);
 
-    int status_solver = CarModel_acados_solve(acados_ocp_capsule);
+    int status_solver = CarModel_acados_solve(acadosOcpCapsule_);
     if (status_solver != ACADOS_SUCCESS)
     {
         std::cout << "acados returned status " << status_solver << ". Exiting.\n";
@@ -142,7 +142,7 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoints>
 
     // get solution
     double u[NU];
-    ocp_nlp_out_get(nlp_config, nlp_dims, nlp_out, 0, "u", &u);
+    ocp_nlp_out_get(nlpConfig_, nlpDims_, nlpOut_, 0, "u", &u);
 
     signal.speed    = u[0];
     signal.steering = u[1];

@@ -54,13 +54,13 @@ public:
               ControlSignal &signal);
 
 private:
-    CarModel_solver_capsule *acados_ocp_capsule;
-    ocp_nlp_config *nlp_config;
-    ocp_nlp_dims *nlp_dims;
-    ocp_nlp_in *nlp_in;
-    ocp_nlp_out *nlp_out;
-    ocp_nlp_solver *nlp_solver;
-    void *nlp_opts;
+    CarModel_solver_capsule *acadosOcpCapsule_;
+    ocp_nlp_config *nlpConfig_;
+    ocp_nlp_dims *nlpDims_;
+    ocp_nlp_in *nlpIn_;
+    ocp_nlp_out *nlpOut_;
+    ocp_nlp_solver *nlpSolver_;
+    void *nlpOpts_;
 
     double parameter[NP];  // Parameter
     double *W_, *W_e_;     // Weight
