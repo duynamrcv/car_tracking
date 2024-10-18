@@ -23,7 +23,7 @@
 #define N    CARMODEL_N
 #define NBU  CARMODEL_NBU
 
-struct WayPoints
+struct WayPoint
 {
     double x;
     double y;
@@ -50,7 +50,7 @@ public:
     void setWeights(const double weight[NY]);
     void setParmeters(double wheelbase);
 
-    int solve(const double currentState[3], const std::vector<WayPoints> localTrajectory,
+    int solve(const double currentState[3], const std::vector<WayPoint> localTrajectory,
               ControlSignal &signal);
 
 private:

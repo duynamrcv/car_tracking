@@ -87,7 +87,7 @@ private:
 };
 
 void getLocalTrajectory(const std::vector<std::tuple<double, double, double>>& points, int iter,
-                        std::vector<WayPoints>& localTrajectory)
+                        std::vector<WayPoint>& localTrajectory)
 {
     for (int j = 0; j < N; j++)
     {
@@ -96,7 +96,7 @@ void getLocalTrajectory(const std::vector<std::tuple<double, double, double>>& p
         {
             index = points.size() - 1;
         }
-        WayPoints wp;
+        WayPoint wp;
         wp.x     = std::get<0>(points[index]);
         wp.y     = std::get<1>(points[index]);
         wp.yaw   = std::get<2>(points[index]);
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < points.size(); i++)
     {
         // Collect reference data
-        std::vector<WayPoints> localTrajectory;
+        std::vector<WayPoint> localTrajectory;
         getLocalTrajectory(points, i, localTrajectory);
 
         // Solve

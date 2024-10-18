@@ -87,7 +87,7 @@ void Controller::setWeights(const double weight[NY])
     W_e_[2 + (NX)*2] = weight[2];
 }
 
-int Controller::solve(const double currentState[3], const std::vector<WayPoints> localTrajectory,
+int Controller::solve(const double currentState[3], const std::vector<WayPoint> localTrajectory,
                       ControlSignal& signal)
 {
     // check if the number of way points is different from the number of shooting intervals
