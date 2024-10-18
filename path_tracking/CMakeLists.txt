@@ -12,6 +12,8 @@ target_include_directories(path_tracking  PUBLIC
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/generated_model
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/generated_model/CarModel_model
 )
 
 target_link_libraries(path_tracking PUBLIC
