@@ -68,7 +68,7 @@ N = 20  # number of discretization steps
 T = 20.00  # maximum simulation time[s]
 dt = 0.1  # time step[s]
 
-file_name = "home/nambd3/spline_path/data/reference.txt"
+file_name = "/home/nambd3/spline_path/data/reference.txt"
 xref_pre, yref_pre, theta_ref_pre, dirs_pre = load_path(file_name)
 
 xref, yref, theta_ref, dirsref, xref2, yref2, theta_ref2, dirsref2 = gen_2sub_path(xref_pre, yref_pre, theta_ref_pre, dirs_pre)
