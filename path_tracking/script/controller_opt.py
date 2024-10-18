@@ -31,25 +31,32 @@ class Controller:
         y = ca.SX.sym('y')
         yaw = ca.SX.sym('yaw')
         states = ca.vertcat(x, y, yaw)
+
+        # Parameters
+        L = ca.SX.sym('wheelbase')
         
         # Acados model
         states_dot = ca.SX.sym("states_dot", states.shape)
 
         # function
-        rhs = [v * ca.cos(yaw), v * ca.sin(yaw), v * ca.tan(steer) / self.car.wheelbase]
-        f_expl = ca.Function('f', [states, controls], [ca.vcat(rhs)], ['state', 'control_input'], ['rhs'])
-        f_impl = states_dot - f_expl(states, controls)
+        # rhs = [v * ca.cos(yaw), v * ca.sin(yaw), v * ca.tan(steer) / L]
+        # f_expl = ca.Function('f', [states, controls], [ca.vcat(rhs)], ['state', 'control_input'], ['rhs'])
+
+        f_expl = ca.vertcat(v * ca.cos(yaw),
+                            v * ca.sin(yaw),
+                            v * ca.tan(steer) / L)
+        f_impl = states_dot - f_expl
 
         # model configuration
         model = AcadosModel()  # ca.types.SimpleNamespace()
-        model.f_expl_expr = f_expl(states, controls)  # CasADi expression for the explicit dynamics x˙=fexpl(x,u,p).
+        model.f_expl_expr = f_expl  # CasADi expression for the explicit dynamics x˙=fexpl(x,u,p).
         # Used if acados_template.acados_ocp.AcadosOcpOptions.integrator_type == ‘ERK.’
         model.f_impl_expr = f_impl  # CasADi expression for the implicit dynamics fimpl(x˙,x,u,z,p)=0.
         # Used if acados_template.acados_ocp.AcadosOcpOptions.integrator_type == ‘IRK.’
         model.x = states  # CasADi variable describing the state of the system
         model.xdot = states_dot  # CasADi variable describing the time-derivative of the state
         model.u = controls  # CasADi variable describing the control input of the system
-        model.p = []  # CasADi variable describing the parameters of the system (not used here)
+        model.p = L # CasADi variable describing the parameters of the system (not used here)
         model.name = model_name  # Name of the system
         
         return model
@@ -58,7 +65,7 @@ class Controller:
         nx = self.acados_model.x.size()[0]  # number of states [x, y, yaw]
         nu = self.acados_model.u.size()[0]  # number of control inputs [v, steer]
         ny = nx + nu  # number of variables in total [x, y, yaw, v, steer] for each node
-        n_params = len(self.acados_model.p)  # number of parameters to be optimized
+        n_params = self.acados_model.p.size()[0]  # number of parameters to be optimized
 
         ocp = AcadosOcp()
         ocp.model = self.acados_model
@@ -67,14 +74,14 @@ class Controller:
 
         # Initialize parameters
         ocp.dims.np = n_params
-        ocp.parameter_values = np.zeros(n_params)
+        ocp.parameter_values = np.ones(n_params)
 
         # Cost type
         ocp.cost.cost_type = 'LINEAR_LS'
         ocp.cost.cost_type_e = 'LINEAR_LS'
 
-        ocp.cost.W = scipy.linalg.block_diag(q_cost, r_cost)  # weight matrix for states and control inputs
-        ocp.cost.W_e = q_cost  # weight matrix for the final state
+        ocp.cost.W = np.diag(np.concatenate([q_cost, r_cost]))  # weight matrix for states and control inputs
+        ocp.cost.W_e = np.diag(q_cost)  # weight matrix for the final state
 
         ocp.cost.Vx = np.zeros((ny, nx))  # x matrix coefficient at intermediate shooting nodes (1 to N-1).
         ocp.cost.Vx[:nx, :nx] = np.eye(nx)  # identity matrix

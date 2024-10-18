@@ -68,7 +68,7 @@ N = 20  # number of discretization steps
 T = 20.00  # maximum simulation time[s]
 dt = 0.1  # time step[s]
 
-file_name = "reference.txt"
+file_name = "home/nambd3/spline_path/data/reference.txt"
 xref_pre, yref_pre, theta_ref_pre, dirs_pre = load_path(file_name)
 
 xref, yref, theta_ref, dirsref, xref2, yref2, theta_ref2, dirsref2 = gen_2sub_path(xref_pre, yref_pre, theta_ref_pre, dirs_pre)
@@ -78,7 +78,11 @@ xref, yref, theta_ref, dirsref, xref2, yref2, theta_ref2, dirsref2 = gen_2sub_pa
 model_file = "/home/nambd3/spline_path/path_tracking/config/car_model.yaml"
 car = Car(np.array([xref[0], yref[0], theta_ref[0]]), model_file)
 controller = Controller(car, t_horizon=N*dt, n_nodes=N,
-                        q_cost=np.diag([10., 10., 0.01]), r_cost=np.diag([0.1, 0.1]))
+                        q_cost=np.array([10., 10., 0.01]), r_cost=np.array([0.1, 0.1])
+                        )
+
+wheelbase = car.wheelbase
+p_value = np.array([car.wheelbase])
 
 time_record = []
 control_record = []
@@ -92,12 +96,14 @@ for i in range(len(xref)):
             index = -1
         y_ref = np.array([xref[index], yref[index], theta_ref[index], 0, 0])
         controller.acados_ocp_solver.set(j, 'yref', y_ref)
+        controller.acados_ocp_solver.set(j, 'p', np.array([2.90909]))
 
     indexN = i + controller.N
     if indexN >= len(xref):
         indexN = -1
     y_refN = np.array([xref[indexN], yref[indexN], theta_ref[indexN]])
     controller.acados_ocp_solver.set(N, 'yref', y_refN)
+    controller.acados_ocp_solver.set(N, 'p', p_value)
 
     # solve ocp
     start = timeit.default_timer()

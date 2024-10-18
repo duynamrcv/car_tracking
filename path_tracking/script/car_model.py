@@ -18,7 +18,7 @@ class Car:
         # Define the constraints
         self.wheelbase = config['wheel_base']
         self.max_v = config['max_velocity']
-        self.min_v = 0.0
+        self.min_v = -self.max_v
         self.max_steer = np.deg2rad(config['max_steering'])
         self.min_steer = -self.max_steer
 
