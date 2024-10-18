@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
-add_executable(example main.cpp)
+add_executable(example_preprocess example_preprocess.cpp)
+target_link_libraries(example_preprocess path_preprocessing)
+target_include_directories(example_preprocess PRIVATE ${CMAKE_SOURCE_DIR})
 
-target_link_libraries(example
-    path_preprocessing
-)
-
-target_include_directories(example PRIVATE
-    ${CMAKE_SOURCE_DIR}
-)
+add_executable(example_tracking example_tracking.cpp)
+target_link_libraries(example_tracking path_tracking)
+target_include_directories(example_tracking PRIVATE ${CMAKE_SOURCE_DIR})

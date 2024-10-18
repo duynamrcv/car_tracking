@@ -14,6 +14,7 @@ bool loadBasementData(std::string path, std::vector<Eigen::Vector2d>& points)
 
     std::ifstream data(path);
     std::string line;
+    bool isCollect = true;
     while (data)
     {
         std::getline(data, line);
@@ -27,8 +28,12 @@ bool loadBasementData(std::string path, std::vector<Eigen::Vector2d>& points)
         {
             sample.push_back(std::stod(token));  // Add each token to the result vector
         }
-        Eigen::Vector2d point(sample[1], sample[2]);
-        points.push_back(point);
+        
+        if((int)sample.back() == 1)
+        {
+            Eigen::Vector2d point(sample[1], sample[2]);
+            points.push_back(point);
+        }
     }
     return true;
 }
@@ -56,10 +61,11 @@ void saveToCSV(const std::string& filename, const std::vector<Eigen::Vector2d>& 
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 4)
     {
         std::cout << "Usage: " << argv[0]
                   << " <method> <input_basement_path> <output_trajectory_path>\n";
+        exit(1);
     }
 
     int method                 = std::stoi(argv[1]);
@@ -74,7 +80,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<Eigen::Vector2d> trajectory;
-    double ds  = 0.1;  // Distance between consecutive points
+    double ds  = 0.2;  // Distance between consecutive points
     SplineContext context;
     if (method == 0)    // 0 - B Spline, 1 - Cubic Spline
     {
