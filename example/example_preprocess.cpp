@@ -39,16 +39,16 @@ bool loadBasementData(std::string path, std::vector<Eigen::Vector2d>& points)
 }
 
 // Function to save trajectory to CSV file
-void saveToCSV(const std::string& filename, const std::vector<Eigen::Vector2d>& points)
+void saveToCSV(const std::string& filename, const std::vector<WayPoint>& points)
 {
     std::ofstream file(filename);
 
     if (file.is_open())
     {
-        file << "x,y\n";  // CSV header
+        file << "x,y,yaw\n";  // CSV header
         for (const auto& p : points)
         {
-            file << p.x() << "," << p.y() << "\n";
+            file << p.x << "," << p.y << "," << p.yaw << "\n";
         }
         file.close();
         std::cout << "Trajectory saved to " << filename << std::endl;
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    std::vector<Eigen::Vector2d> trajectory;
+    std::vector<WayPoint> trajectory;
     double ds  = 0.2;  // Distance between consecutive points
     SplineContext context;
     if (method == 0)    // 0 - B Spline, 1 - Cubic Spline

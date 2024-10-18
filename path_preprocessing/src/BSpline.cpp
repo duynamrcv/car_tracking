@@ -50,7 +50,6 @@ std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vecto
         t += step;
     }
 
-    std::cout << splinePoints.size() << " here\n";
     return splinePoints;
 }
 
