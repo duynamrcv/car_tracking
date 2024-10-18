@@ -52,4 +52,5 @@ include (${CMAKE_SOURCE_DIR}/cmake/Dependencies.cmake)
 
 # into the project
 add_subdirectory(path_preprocessing)
+add_subdirectory(path_tracking)
 add_subdirectory(example)
