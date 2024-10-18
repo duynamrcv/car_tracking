@@ -14,6 +14,7 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
     std::ifstream data(path);
     std::string line;
     bool isCollect = true;
+    std::getline(data, line);  // Do not consider the first line
     while (data)
     {
         std::getline(data, line);
@@ -23,7 +24,7 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
         std::vector<double> sample;
 
         // Use std::getline to split the string by the delimiter
-        while (std::getline(ss, token, ' '))
+        while (std::getline(ss, token, ','))
         {
             sample.push_back(std::stod(token));  // Add each token to the result vector
         }
@@ -35,7 +36,8 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
 }
 
 // Function to save trajectory to CSV file
-void saveToCSV(const std::string& filename, const std::vector<std::tuple<double, double, double>>& motionPath)
+void saveToCSV(const std::string& filename,
+               const std::vector<std::tuple<double, double, double>>& motionPath)
 {
     std::ofstream file(filename);
 
@@ -113,8 +115,10 @@ int main(int argc, char** argv)
 
     std::string referencePath = argv[1];
     std::string motionPath    = argv[2];
+
     std::vector<std::tuple<double, double, double>> points;
     bool isLoad = loadBasementData(referencePath, points);
+
     if (!isLoad)
     {
         std::cout << "Load file error\n";
@@ -122,7 +126,7 @@ int main(int argc, char** argv)
     }
 
     double dt = 0.1;
-    Car car(0., 0., 0.);
+    Car car(std::get<0>(points[0]), std::get<1>(points[0]), std::get<2>(points[0]));
     Controller controller;
 
     for (int i = 0; i < points.size(); i++)
@@ -141,4 +145,6 @@ int main(int argc, char** argv)
             car.updateState(signal, dt);
         }
     }
+
+    saveToCSV(motionPath, car.motionPath);
 }
