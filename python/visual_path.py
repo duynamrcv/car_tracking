@@ -47,4 +47,5 @@ if __name__ == "__main__":
     plt.plot(x, y, "-or", label="BSpline")
     plt.plot(cx, cy, "-og", label="Cubic Spline")
     plt.axis('scaled')
+    plt.legend()
     plt.show()
