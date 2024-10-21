@@ -35,7 +35,35 @@ void LocalTrajectory::findClosestWaypointAhead()
     }
 }
 
-std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoints)
+std::vector<WayPoint> LocalTrajectory::genLocalPathInter(const Pose& vehiclePose,
+                                                         const int& numPoseAhead,
+                                                         const int& numPoints, const double& step)
+{
+    // Update the vehicle's pose
+    updateVehiclePose(vehiclePose);
+
+    // Get the local path ahead of the vehicle using the specified number of poses
+    std::vector<WayPoint> localPathAhead = getLocalPathAhead(numPoseAhead);
+
+    // Convert the local path to (x, y) points to fit the polynomial
+    std::vector<Eigen::Vector2d> waypoints;
+    for (const auto& point : localPathAhead)
+    {
+        waypoints.emplace_back(Eigen::Vector2d(point.x, point.y));
+    }
+
+    // Fit a polynomial to the waypoints (5th order)
+    const Eigen::VectorXd coefficients = fitPolynomial(waypoints);
+
+    // Generate points with heading using the internally computed coefficients
+    Pose pose;
+    pose.x   = 0.0;
+    pose.y   = 0.0;
+    pose.yaw = 0.0;
+    return generatePointsWithHeading(coefficients, pose, numPoints, step);
+}
+
+std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> localPath;  // Ego waypoint
     WayPoint ego;
@@ -48,7 +76,7 @@ std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoints)
 
     findClosestWaypointAhead();
 
-    for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoints && i < globalPath_.size(); ++i)
+    for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoseAhead && i < globalPath_.size(); ++i)
     {
         const double dx = globalPath_[i].x - vehiclePose_.x;
         const double dy = globalPath_[i].y - vehiclePose_.y;
@@ -65,7 +93,7 @@ std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoints)
     }
 
     // If not enough points, add the last point repeatedly to match the required number of points
-    while (localPath.size() < static_cast<size_t>(numPoints) + 1)
+    while (localPath.size() < static_cast<size_t>(numPoseAhead) + 1)
     {
         // +1 because of ego-point
         localPath.emplace_back(localPath.back());
@@ -74,7 +102,7 @@ std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoints)
     return localPath;
 }
 
-std::vector<WayPoint> LocalTrajectory::getGlobalPathAhead(const int& numPoints)
+std::vector<WayPoint> LocalTrajectory::getGlobalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> globalPathAhead;
     WayPoint ego;
@@ -87,13 +115,13 @@ std::vector<WayPoint> LocalTrajectory::getGlobalPathAhead(const int& numPoints)
 
     findClosestWaypointAhead();
 
-    for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoints && i < globalPath_.size(); ++i)
+    for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoseAhead && i < globalPath_.size(); ++i)
     {
         globalPathAhead.emplace_back(globalPath_[i]);
     }
 
     // If not enough points, add the last point to match the required number of points
-    while (globalPathAhead.size() < static_cast<size_t>(numPoints) + 1)
+    while (globalPathAhead.size() < static_cast<size_t>(numPoseAhead) + 1)
     {
         // +1 because of ego-point
         globalPathAhead.emplace_back(globalPathAhead.back());

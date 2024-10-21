@@ -13,11 +13,13 @@ public:
 
     void updateVehiclePose(const Pose& pose);
     void findClosestWaypointAhead();
-    std::vector<WayPoint> getLocalPathAhead(const int& numPoints);
-    std::vector<WayPoint> getGlobalPathAhead(const int& numPoints);
+    std::vector<WayPoint> getLocalPathAhead(const int& numPoseAhead);
+    std::vector<WayPoint> getGlobalPathAhead(const int& numPoseAhead);
+    std::vector<WayPoint> genLocalPathInter(const Pose& vehiclePose, const int& numPoseAhead,
+                                            const int& numPoints, const double& step);
+    std::vector<WayPoint> convertLocalToGlobal(const std::vector<WayPoint>& localTrajectory) const;
 
 private:
-    std::vector<WayPoint> convertLocalToGlobal(const std::vector<WayPoint>& localTrajectory) const;
     Eigen::VectorXd fitPolynomial(const std::vector<Eigen::Vector2d>& waypoints) const;
     static std::vector<WayPoint> generatePointsWithHeading(const Eigen::VectorXd& coefficient,
                                                            const Pose& currentPose,
