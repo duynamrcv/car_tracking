@@ -7,3 +7,7 @@ target_include_directories(example_preprocess PRIVATE ${CMAKE_SOURCE_DIR})
 add_executable(example_tracking example_tracking.cpp)
 target_link_libraries(example_tracking path_tracking)
 target_include_directories(example_tracking PRIVATE ${CMAKE_SOURCE_DIR})
+
+add_executable(example_local example_local.cpp)
+target_link_libraries(example_local path_tracking)
+target_include_directories(example_local PRIVATE ${CMAKE_SOURCE_DIR})

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 
-#include "LocalTrajectory.h"
+#include "LocalPlanner.h"
 
 bool loadBasementData(std::string path, std::vector<WayPoint>& points)
 {
@@ -41,16 +41,20 @@ bool loadBasementData(std::string path, std::vector<WayPoint>& points)
 }
 
 // Function to save trajectory to CSV file
-void saveToCSV(const std::string& filename, const std::vector<WayPoint>& path)
+void saveToCSV(const std::string& filename, const std::vector<std::vector<WayPoint>>& data)
 {
     std::ofstream file(filename);
 
     if (file.is_open())
     {
-        file << "x,y,yaw\n";  // CSV header
-        for (const auto& p : path)
+        // file << "x,y,yaw\n";  // CSV header
+        for (const std::vector<WayPoint>& path : data)
         {
-            file << p.x << "," << p.y << "," << p.yaw << "\n";
+            for(const WayPoint& p: path)
+            {
+                file  << p.x << " " << p.y << " " << p.yaw << " ";
+            }
+            file << "\n";
         }
         file.close();
         std::cout << "Trajectory saved to " << filename << std::endl;
@@ -86,9 +90,10 @@ int main(int argc, char** argv)
     vehiclePose.x   = globalPath[0].x;
     vehiclePose.y   = globalPath[0].y;
     vehiclePose.yaw = globalPath[0].yaw;
-    LocalTrajectory lt(globalPath, vehiclePose, 3);
+    LocalPlanner lp(globalPath, vehiclePose, 3);
 
     // Step 3: Animate vehicle movement along the path using genLocalPathInter
+    std::vector<std::vector<WayPoint>> data;
     for (size_t i = 0; i < globalPath.size() - 30; ++i)
     {
         // Update vehicle pose to simulate movement along the path
@@ -97,12 +102,16 @@ int main(int argc, char** argv)
         vehiclePose.yaw = globalPath[i].yaw;
 
         // Use genLocalPathInter to get points with heading
-        auto pointsWithHeading = lt.genLocalPathInter(vehiclePose, 30, 15, 0.3);
+        std::vector<WayPoint> pointsWithHeading = lp.genLocalPathInter(vehiclePose, 30, 15, 0.3);
 
         // Convert the generated local path back to global coordinates
-        auto globalPathConverted = lt.convertLocalToGlobal(pointsWithHeading);
+        std::vector<WayPoint> globalPathConverted = lp.convertLocalToGlobal(pointsWithHeading);
 
-        // Save to CSV
+        data.emplace_back(globalPathConverted);
     }
+    
+    // Save to CSV
+    saveToCSV(motionPath, data);
+
     return 0;
 }
