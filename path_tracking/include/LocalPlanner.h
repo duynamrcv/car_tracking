@@ -5,11 +5,11 @@
 #include <iostream>
 #include "CarModel.h"
 
-class LocalTrajectory
+class LocalPlanner
 {
 public:
-    LocalTrajectory(const std::vector<WayPoint>& globalPath, const Pose& pose, const int order);
-    ~LocalTrajectory();
+    LocalPlanner(const std::vector<WayPoint>& globalPath, const Pose& pose, const int order);
+    ~LocalPlanner();
 
     void updateVehiclePose(const Pose& pose);
     void findClosestWaypointAhead();

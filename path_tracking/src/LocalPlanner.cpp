@@ -1,20 +1,20 @@
-#include "LocalTrajectory.h"
+#include "LocalPlanner.h"
 
-LocalTrajectory::LocalTrajectory(const std::vector<WayPoint>& globalPath, const Pose& pose,
+LocalPlanner::LocalPlanner(const std::vector<WayPoint>& globalPath, const Pose& pose,
                                  const int order)
 {
     globalPath_  = globalPath;
     vehiclePose_ = pose;
     order_       = order;
 }
-LocalTrajectory::~LocalTrajectory() {}
+LocalPlanner::~LocalPlanner() {}
 
-void LocalTrajectory::updateVehiclePose(const Pose& pose)
+void LocalPlanner::updateVehiclePose(const Pose& pose)
 {
     vehiclePose_ = pose;
 }
 
-void LocalTrajectory::findClosestWaypointAhead()
+void LocalPlanner::findClosestWaypointAhead()
 {
     constexpr int searchWindow = 50;  // Limit the search to the next 50 points
     double minDistance         = std::numeric_limits<double>::max();
@@ -35,7 +35,7 @@ void LocalTrajectory::findClosestWaypointAhead()
     }
 }
 
-std::vector<WayPoint> LocalTrajectory::genLocalPathInter(const Pose& vehiclePose,
+std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
                                                          const int& numPoseAhead,
                                                          const int& numPoints, const double& step)
 {
@@ -63,7 +63,7 @@ std::vector<WayPoint> LocalTrajectory::genLocalPathInter(const Pose& vehiclePose
     return generatePointsWithHeading(coefficients, pose, numPoints, step);
 }
 
-std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoseAhead)
+std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> localPath;  // Ego waypoint
     WayPoint ego;
@@ -102,7 +102,7 @@ std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoseAhead
     return localPath;
 }
 
-std::vector<WayPoint> LocalTrajectory::getGlobalPathAhead(const int& numPoseAhead)
+std::vector<WayPoint> LocalPlanner::getGlobalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> globalPathAhead;
     WayPoint ego;
@@ -130,7 +130,7 @@ std::vector<WayPoint> LocalTrajectory::getGlobalPathAhead(const int& numPoseAhea
     return globalPathAhead;
 }
 
-std::vector<WayPoint> LocalTrajectory::convertLocalToGlobal(
+std::vector<WayPoint> LocalPlanner::convertLocalToGlobal(
     const std::vector<WayPoint>& localTrajectory) const
 {
     std::vector<WayPoint> globalTrajectory;
@@ -149,7 +149,7 @@ std::vector<WayPoint> LocalTrajectory::convertLocalToGlobal(
     return globalTrajectory;
 }
 
-Eigen::VectorXd LocalTrajectory::fitPolynomial(const std::vector<Eigen::Vector2d>& waypoints) const
+Eigen::VectorXd LocalPlanner::fitPolynomial(const std::vector<Eigen::Vector2d>& waypoints) const
 {
     size_t n = waypoints.size();
 
@@ -230,7 +230,7 @@ Eigen::VectorXd LocalTrajectory::fitPolynomial(const std::vector<Eigen::Vector2d
     return finalCoefficients;
 }
 
-std::vector<WayPoint> LocalTrajectory::generatePointsWithHeading(const Eigen::VectorXd& coefficient,
+std::vector<WayPoint> LocalPlanner::generatePointsWithHeading(const Eigen::VectorXd& coefficient,
                                                                  const Pose& currentPose,
                                                                  const int& numPoints,
                                                                  const double& step)
@@ -262,7 +262,7 @@ std::vector<WayPoint> LocalTrajectory::generatePointsWithHeading(const Eigen::Ve
     }
     return localTrajectory;
 }
-double LocalTrajectory::normalizeAngle(double angle)
+double LocalPlanner::normalizeAngle(double angle)
 {
     while (angle > M_PI)
         angle -= 2.0 * M_PI;
@@ -271,7 +271,7 @@ double LocalTrajectory::normalizeAngle(double angle)
     return angle;
 }
 
-double LocalTrajectory::evaluatePolynomial(const Eigen::VectorXd& coefficients, const double& x)
+double LocalPlanner::evaluatePolynomial(const Eigen::VectorXd& coefficients, const double& x)
 {
     double y = 0.0;
     for (int i = 0; i < coefficients.size(); ++i)
@@ -281,7 +281,7 @@ double LocalTrajectory::evaluatePolynomial(const Eigen::VectorXd& coefficients, 
     return y;
 }
 
-double LocalTrajectory::evaluateDerivative(const Eigen::VectorXd& coefficients, const double& x)
+double LocalPlanner::evaluateDerivative(const Eigen::VectorXd& coefficients, const double& x)
 {
     double dy_dx = 0.0;
     for (int i = 1; i < coefficients.size(); ++i)
