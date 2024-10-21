@@ -43,7 +43,7 @@ public:
         pose.y   = pose.y + signal.speed * sin(pose.yaw) * dt;
         pose.yaw = pose.yaw + signal.speed * tan(signal.steering) / wheelbase_ * dt;
 
-        motionPath.push_back(pose);
+        motionPath.emplace_back(pose);
     }
 
     Pose pose;

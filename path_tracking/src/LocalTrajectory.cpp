@@ -68,7 +68,7 @@ std::vector<WayPoint> LocalTrajectory::getLocalPathAhead(const int& numPoints)
     while (localPath.size() < static_cast<size_t>(numPoints) + 1)
     {
         // +1 because of ego-point
-        localPath.push_back(localPath.back());
+        localPath.emplace_back(localPath.back());
     }
 
     return localPath;
@@ -158,7 +158,7 @@ Eigen::VectorXd LocalTrajectory::fitPolynomial(const std::vector<Eigen::Vector2d
             yFitted += initialCoefficients[j] * pow(waypoints[i].x(), j);
         }
         double residual = std::abs(waypoints[i].y() - yFitted);
-        residuals.push_back(residual);
+        residuals.emplace_back(residual);
     }
 
     // Determine the threshold for outlier removal (e.g., based on a factor of the median residual)

@@ -11,8 +11,8 @@ std::vector<Eigen::Vector2d> CubicSpline::interpolate(const std::vector<Eigen::V
     std::vector<double> x, y;
     for(int i = 0; i < points.size(); i++)
     {
-        x.push_back(points[i].x());
-        y.push_back(points[i].y());
+        x.emplace_back(points[i].x());
+        y.emplace_back(points[i].y());
     }
 
     Spline1D sx(computeS(points), x);
@@ -21,7 +21,7 @@ std::vector<Eigen::Vector2d> CubicSpline::interpolate(const std::vector<Eigen::V
 
     std::vector<Eigen::Vector2d> splinePoints;
     for (double sVal = 0; sVal < maxS; sVal += ds) {
-        splinePoints.push_back(computePosition(sx, sy, sVal));
+        splinePoints.emplace_back(computePosition(sx, sy, sVal));
     }
     return splinePoints;
 }
@@ -36,7 +36,7 @@ std::vector<double> CubicSpline::computeS(const std::vector<Eigen::Vector2d>& po
         double dx = points[i].x() - points[i - 1].x();
         double dy = points[i].y() - points[i - 1].y();
         ds[i - 1] = hypot(dx, dy);
-        sVal.push_back(sVal.back() + ds[i - 1]);
+        sVal.emplace_back(sVal.back() + ds[i - 1]);
     }
     return sVal;
 }

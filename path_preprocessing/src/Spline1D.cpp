@@ -27,8 +27,8 @@ Spline1D::Spline1D(const std::vector<double>& x, const std::vector<double>& y) :
     for (int i = 0; i < nx_ - 1; i++)
     {
         double tb = (a_[i + 1] - a_[i]) / h[i] - h[i] * (2.0 * c_[i] + c_[i + 1]) / 3.0;
-        b_.push_back(tb);
-        d_.push_back((c_[i + 1] - c_[i]) / (3.0 * h[i]));
+        b_.emplace_back(tb);
+        d_.emplace_back((c_[i + 1] - c_[i]) / (3.0 * h[i]));
     }
 }
 
