@@ -1,11 +1,12 @@
 #include "LocalPlanner.h"
 
 LocalPlanner::LocalPlanner(const std::vector<WayPoint>& globalPath, const Pose& pose,
-                                 const int order)
+                           const int order)
 {
-    globalPath_  = globalPath;
-    vehiclePose_ = pose;
-    order_       = order;
+    globalPath_   = globalPath;
+    vehiclePose_  = pose;
+    order_        = order;
+    vehicleIndex_ = 0;
 }
 LocalPlanner::~LocalPlanner() {}
 
@@ -36,8 +37,8 @@ void LocalPlanner::findClosestWaypointAhead()
 }
 
 std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
-                                                         const int& numPoseAhead,
-                                                         const int& numPoints, const double& step)
+                                                      const int& numPoseAhead, const int& numPoints,
+                                                      const double& step)
 {
     // Update the vehicle's pose
     updateVehiclePose(vehiclePose);
@@ -66,16 +67,8 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
 std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> localPath;  // Ego waypoint
-    WayPoint ego;
-    ego.x     = 0.0;
-    ego.y     = 0.0;
-    ego.yaw   = 0.0;
-    ego.v     = 0.0;
-    ego.steer = 0.0;
-    localPath.emplace_back(ego);
 
     findClosestWaypointAhead();
-
     for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoseAhead && i < globalPath_.size(); ++i)
     {
         const double dx = globalPath_[i].x - vehiclePose_.x;
@@ -93,9 +86,8 @@ std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
     }
 
     // If not enough points, add the last point repeatedly to match the required number of points
-    while (localPath.size() < static_cast<size_t>(numPoseAhead) + 1)
+    while (localPath.size() < static_cast<size_t>(numPoseAhead))
     {
-        // +1 because of ego-point
         localPath.emplace_back(localPath.back());
     }
 
@@ -105,23 +97,15 @@ std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
 std::vector<WayPoint> LocalPlanner::getGlobalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> globalPathAhead;
-    WayPoint ego;
-    ego.x     = vehiclePose_.x;
-    ego.y     = vehiclePose_.y;
-    ego.yaw   = vehiclePose_.yaw;
-    ego.v     = 0.0;
-    ego.steer = 0.0;
-    globalPathAhead.emplace_back(ego);
 
     findClosestWaypointAhead();
-
     for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoseAhead && i < globalPath_.size(); ++i)
     {
         globalPathAhead.emplace_back(globalPath_[i]);
     }
 
     // If not enough points, add the last point to match the required number of points
-    while (globalPathAhead.size() < static_cast<size_t>(numPoseAhead) + 1)
+    while (globalPathAhead.size() < static_cast<size_t>(numPoseAhead))
     {
         // +1 because of ego-point
         globalPathAhead.emplace_back(globalPathAhead.back());
@@ -131,7 +115,7 @@ std::vector<WayPoint> LocalPlanner::getGlobalPathAhead(const int& numPoseAhead)
 }
 
 std::vector<WayPoint> LocalPlanner::convertLocalToGlobal(
-    const std::vector<WayPoint>& localTrajectory) const
+    const std::vector<WayPoint>& localTrajectory)
 {
     std::vector<WayPoint> globalTrajectory;
     for (const WayPoint& point : localTrajectory)
@@ -231,9 +215,9 @@ Eigen::VectorXd LocalPlanner::fitPolynomial(const std::vector<Eigen::Vector2d>& 
 }
 
 std::vector<WayPoint> LocalPlanner::generatePointsWithHeading(const Eigen::VectorXd& coefficient,
-                                                                 const Pose& currentPose,
-                                                                 const int& numPoints,
-                                                                 const double& step)
+                                                              const Pose& currentPose,
+                                                              const int& numPoints,
+                                                              const double& step)
 {
     std::vector<WayPoint> localTrajectory;
     // Save the first point to ego point

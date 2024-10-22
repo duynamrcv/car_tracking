@@ -17,7 +17,7 @@ public:
     std::vector<WayPoint> getGlobalPathAhead(const int& numPoseAhead);
     std::vector<WayPoint> genLocalPathInter(const Pose& vehiclePose, const int& numPoseAhead,
                                             const int& numPoints, const double& step);
-    std::vector<WayPoint> convertLocalToGlobal(const std::vector<WayPoint>& localTrajectory) const;
+    std::vector<WayPoint> convertLocalToGlobal(const std::vector<WayPoint>& localTrajectory);
 
 private:
     Eigen::VectorXd fitPolynomial(const std::vector<Eigen::Vector2d>& waypoints) const;
