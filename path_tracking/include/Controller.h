@@ -34,7 +34,7 @@ public:
     void setWeights(const double weight[NY]);
     void setParmeters(double wheelbase);
 
-    int solve(const double currentState[3], const std::vector<WayPoint> localTrajectory,
+    int solve(const Pose &currentPose, const std::vector<WayPoint> localTrajectory,
               ControlSignal &signal);
 
 private:
@@ -46,7 +46,7 @@ private:
     ocp_nlp_solver *nlpSolver_;
     void *nlpOpts_;
 
-    double parameter[NP];  // Parameter
-    double *W_, *W_e_;     // Weight
-    double *lbu, *ubu;     // Constraint
+    double parameter[NP];               // Parameter
+    double W_[NY * NY], W_e_[NX * NX];  // Weight
+    double lbu_[NU], ubu_[NU];          // Constraint
 };

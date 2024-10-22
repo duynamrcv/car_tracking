@@ -23,20 +23,13 @@ Controller::Controller()
     nlpSolver_ = CarModel_acados_get_nlp_solver(acadosOcpCapsule_);
     nlpOpts_   = CarModel_acados_get_nlp_opts(acadosOcpCapsule_);
 
-    W_   = (double*)calloc(NY * NY, sizeof(double));
-    W_e_ = (double*)calloc(NX * NX, sizeof(double));
-
-    double* lubu = (double*)calloc(2 * NBU, sizeof(double));
-    lbu          = lubu;
-    ubu          = lubu + NBU;
-
     // Fix parameter, edit to input config
     double wheelbase   = 2.95;
     double weight[NY]  = {100., 100., 0.01, 0.1, 0.1};
     double maxV        = 1.5;
     double minV        = 0.0;
-    double maxSteering = M_PI / 6;
-    double minSteering = -M_PI / 6;
+    double maxSteering = M_PI / 3;
+    double minSteering = -M_PI / 3;
 
     setParmeters(wheelbase);
     setWeights(weight);
@@ -66,10 +59,10 @@ void Controller::setParmeters(double wheelbase)
 
 void Controller::setContraints(double maxV, double minV, double maxSteering, double minSteering)
 {
-    lbu[0] = minV;
-    ubu[0] = maxV;
-    lbu[1] = minSteering;
-    ubu[1] = maxSteering;
+    lbu_[0] = minV;
+    ubu_[0] = maxV;
+    lbu_[1] = minSteering;
+    ubu_[1] = maxSteering;
 }
 
 void Controller::setWeights(const double weight[NY])
@@ -87,7 +80,7 @@ void Controller::setWeights(const double weight[NY])
     W_e_[2 + (NX)*2] = weight[2];
 }
 
-int Controller::solve(const double currentState[3], const std::vector<WayPoint> localTrajectory,
+int Controller::solve(const Pose& currentPose, const std::vector<WayPoint> localTrajectory,
                       ControlSignal& signal)
 {
     // check if the number of way points is different from the number of shooting intervals
@@ -99,7 +92,7 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoint> 
 
     for (size_t i = 0; i <= N; i++)
     {
-        // set target states and costs
+        // set target states, costs and constraints
         if (i < N)
         {
             double state[NX + NU];
@@ -110,6 +103,8 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoint> 
             state[4] = localTrajectory[i].steer;
             ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "yref", state);
             ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "W", W_);
+            ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "lbu", lbu_);
+            ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "ubu", ubu_);
         }
         else
         {
@@ -126,11 +121,11 @@ int Controller::solve(const double currentState[3], const std::vector<WayPoint> 
     }
 
     // set initial condition
-    double initState[NX];
-    for (int i = 0; i < NX; i++)
-    {
-        initState[i] = currentState[i];
-    }
+    double initState[NX] = {currentPose.x, currentPose.y, currentPose.yaw};
+    // for (int i = 0; i < NX; i++)
+    // {
+    //     initState[i] = currentState[i];
+    // }
     ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, 0, "lbx", initState);
     ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, 0, "ubx", initState);
 

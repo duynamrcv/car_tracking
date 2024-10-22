@@ -245,7 +245,7 @@ std::vector<WayPoint> LocalPlanner::generatePointsWithHeading(const Eigen::Vecto
     wp.steer = 0.0;
 
     double x = currentPose.x;
-    for (int i = 1; i < numPoints; ++i)
+    for (int i = 0; i < numPoints; ++i)
     {
         x += step;
         const double y     = evaluatePolynomial(coefficient, x);
