@@ -32,6 +32,11 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
         std::tuple<double, double, double> point(sample[0], sample[1], sample[2]);  // x, y, yaw
         points.push_back(point);
     }
+
+    for(int i = 0; i < 30; i++)
+    {
+        points.push_back(points.back());
+    }
     return true;
 }
 
@@ -107,14 +112,14 @@ int main(int argc, char** argv)
         getLocalTrajectory(points, i, localTrajectory);
 
         // Solve
-        double currentState[3] = {car.pose.x, car.pose.y, car.pose.yaw};
         ControlSignal signal;
-        int success = controller.solve(currentState, localTrajectory, signal);
+        int success = controller.solve(car.pose, localTrajectory, signal);
 
         if (success == 0)
         {
             car.updateState(signal, dt);
         }
+        std::cout << signal.speed << " " << signal.steering << std::endl;
     }
 
     saveToCSV(motionPath, car.motionPath);

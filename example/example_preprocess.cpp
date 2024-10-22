@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<WayPoint> trajectory;
-    double ds  = 0.2;  // Distance between consecutive points
+    double ds  = 0.1;  // Distance between consecutive points
     SplineContext context;
     if (method == 0)    // 0 - B Spline, 1 - Cubic Spline
     {
