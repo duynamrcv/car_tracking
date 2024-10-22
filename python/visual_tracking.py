@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-ref_file = "data/reference.txt"
+ref_file = "data/trajectory0.csv"
 df = pd.read_csv(ref_file, sep=',')
 df = np.array(df)
 
@@ -17,10 +17,17 @@ df = np.array(df)
 x = df[:,0]
 y = df[:,1]
 yaw = df[:,2]
+# v = df[:,3]
+# steer = df[:,4]
 
 plt.figure()
 plt.plot(xr, yr)
 plt.plot(x, y)
 plt.grid(True)
+
+# plt.figure()
+# plt.plot(v)
+# plt.plot(steer)
+# plt.grid(True)
 
 plt.show()
