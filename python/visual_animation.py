@@ -10,12 +10,12 @@ df = np.array(df)
 rx = df[1:,0]
 ry = df[1:,1]
 
-# rb_file = "data/motion_path.csv"
-# df = pd.read_csv(rb_file, sep=',')
-# df = np.array(df)
+rb_file = "data/motion_path.csv"
+df = pd.read_csv(rb_file, sep=',')
+df = np.array(df)
 
-# vehicle_x = df[:,0]
-# vehicle_y = df[:,1]
+vehicle_x = df[:,0]
+vehicle_y = df[:,1]
 
 file_name = "data/motion.csv"
 df = pd.read_csv(file_name, sep=' ')
@@ -35,7 +35,7 @@ for iter in range(df.shape[0]):
     ax.plot(rx, ry, "bo", label="Reference")
 
     # Current vehicle
-    # ax.scatter(vehicle_x[iter], vehicle_y[iter], s=100, label="Vehicle")
+    ax.scatter(vehicle_x[iter], vehicle_y[iter], s=100, label="Vehicle")
 
     # Current motion
     motion = df[iter,:-1].reshape(df[iter,:-1].shape[0]//3, 3)
@@ -52,8 +52,8 @@ for iter in range(df.shape[0]):
     # plt.xlim([vehicle_x[iter]-5, vehicle_x[iter]+5])
     # plt.ylim([vehicle_y[iter]-5, vehicle_y[iter]+5])
 
-    plt.xlim([motion[0,0]-5, motion[0,0]+5])
-    plt.ylim([motion[0,1]-5, motion[0,1]+5])
+    plt.xlim([motion[0,0]-2, motion[0,0]+2])
+    plt.ylim([motion[0,1]-2, motion[0,1]+2])
     plt.tight_layout()
     
     plt.gcf().canvas.mpl_connect('key_release_event',
