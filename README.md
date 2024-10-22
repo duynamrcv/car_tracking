@@ -24,5 +24,5 @@ Build
 
 Run (build step already included in run script)
 ```
-./scripts/run_example.sh
+./scripts/run_example_<name>.sh
 ```
