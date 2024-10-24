@@ -45,23 +45,41 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
 
     // Get the local path ahead of the vehicle using the specified number of poses
     std::vector<WayPoint> localPathAhead = getLocalPathAhead(numPoseAhead);
-
-    // Convert the local path to (x, y) points to fit the polynomial
-    std::vector<Eigen::Vector2d> waypoints;
-    for (const auto& point : localPathAhead)
+    if (localPathAhead.size() < numPoseAhead)
     {
-        waypoints.emplace_back(Eigen::Vector2d(point.x, point.y));
+        // TODO: add as end point
+        std::vector<WayPoint> localTrajectory;
+        for (int i = 0; i < numPoints; i++)
+        {
+            int index = vehicleIndex_ + i;
+            if (index >= globalPath_.size()) index = globalPath_.size() - 1;
+            localTrajectory.emplace_back(globalPath_[index]);
+        }
+        return localTrajectory;
     }
+    else
+    {
+        // Convert the local path to (x, y) points to fit the polynomial
+        std::vector<Eigen::Vector2d> waypoints;
+        for (const auto& point : localPathAhead)
+        {
+            waypoints.emplace_back(Eigen::Vector2d(point.x, point.y));
+        }
 
-    // Fit a polynomial to the waypoints (5th order)
-    const Eigen::VectorXd coefficients = fitPolynomial(waypoints);
+        // Fit a polynomial to the waypoints (5th order)
+        const Eigen::VectorXd coefficients = fitPolynomial(waypoints);
 
-    // Generate points with heading using the internally computed coefficients
-    Pose pose;
-    pose.x   = 0.0;
-    pose.y   = 0.0;
-    pose.yaw = 0.0;
-    return generatePointsWithHeading(coefficients, pose, numPoints, step);
+        // Generate points with heading using the internally computed coefficients
+        Pose pose;
+        pose.x   = 0.0;
+        pose.y   = 0.0;
+        pose.yaw = 0.0;
+        std::vector<WayPoint> pointsWithHeading =
+            generatePointsWithHeading(coefficients, pose, numPoints, step);
+
+        // Convert the generated local path back to global coordinates
+        return convertLocalToGlobal(pointsWithHeading);
+    }
 }
 
 std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePose,
@@ -91,7 +109,7 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePo
             pointsWithHeading.push_back(allPoints[i]);
             distance = 0;
         }
-        if(allPoints.size() == numPoints) break;
+        if (allPoints.size() == numPoints) break;
     }
     return pointsWithHeading;
 }
@@ -118,10 +136,10 @@ std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
     }
 
     // If not enough points, add the last point repeatedly to match the required number of points
-    while (localPath.size() < static_cast<size_t>(numPoseAhead))
-    {
-        localPath.emplace_back(localPath.back());
-    }
+    // while (localPath.size() < static_cast<size_t>(numPoseAhead))
+    // {
+    //     localPath.emplace_back(localPath.back());
+    // }
 
     return localPath;
 }

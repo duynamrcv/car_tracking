@@ -17,8 +17,8 @@ df = np.array(df)
 x = df[:,0]
 y = df[:,1]
 yaw = df[:,2]
-# v = df[:,3]
-# steer = df[:,4]
+v = df[:,3]
+steer = df[:,4]
 
 plt.figure(figsize=(4,6))
 plt.plot(xr, yr, label="reference")
@@ -30,10 +30,11 @@ plt.ylabel('y [m]')
 plt.legend()
 plt.tight_layout()
 
-# plt.figure()
-# plt.plot(v)
-# plt.plot(steer)
-# plt.grid(True)
 file_name = "data/tracking.png"
 plt.savefig(file_name)
+
+plt.figure()
+plt.plot(v)
+plt.plot(steer)
+plt.grid(True)
 plt.show()

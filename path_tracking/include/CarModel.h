@@ -35,10 +35,7 @@ public:
         pose.yaw = yaw_;
     }
 
-    Car(const Pose& pose_)
-    {
-        pose = pose_;
-    }
+    Car(const Pose& pose_) { pose = pose_; }
 
     ~Car(){};
 
@@ -48,11 +45,17 @@ public:
         pose.y   = pose.y + signal.speed * sin(pose.yaw) * dt;
         pose.yaw = pose.yaw + signal.speed * tan(signal.steering) / wheelbase_ * dt;
 
-        motionPath.emplace_back(pose);
+        WayPoint wp;
+        wp.x     = pose.x;
+        wp.y     = pose.y;
+        wp.yaw   = pose.yaw;
+        wp.v     = signal.speed;
+        wp.steer = signal.steering;
+        motionPath.emplace_back(wp);
     }
 
     Pose pose;
-    std::vector<Pose> motionPath;
+    std::vector<WayPoint> motionPath;
 
 private:
     double wheelbase_ = 2.95;

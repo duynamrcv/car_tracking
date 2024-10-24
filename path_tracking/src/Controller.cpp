@@ -25,11 +25,11 @@ Controller::Controller()
 
     // Fix parameter, edit to input config
     double wheelbase   = 2.95;
-    double weight[NY]  = {100., 100., 0.01, 0.1, 0.1};
+    double weight[NY]  = {10., 10., 0.01, 0.1, 0.1};
     double maxV        = 1.0;
     double minV        = 0.0;
-    double maxSteering = M_PI / 4;
-    double minSteering = -M_PI / 4;
+    double maxSteering = M_PI / 6;
+    double minSteering = -M_PI / 6;
     double timeStep    = 0.1;
 
     setTimeStep(timeStep);

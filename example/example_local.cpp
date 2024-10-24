@@ -66,17 +66,16 @@ void saveToCSV(const std::string& filename, const std::vector<std::vector<WayPoi
     }
 }
 
-void saveToCSV(const std::string& filename,
-               const std::vector<Pose>& motionPath)
+void saveToCSV(const std::string& filename, const std::vector<WayPoint>& motionPath)
 {
     std::ofstream file(filename);
 
     if (file.is_open())
     {
-        file << "x,y,yaw\n";  // CSV header
+        file << "x,y,yaw,v,steer\n";  // CSV header
         for (const auto& p : motionPath)
         {
-            file << p.x << "," << p.y << "," << p.yaw << "\n";
+            file << p.x << "," << p.y << "," << p.yaw << "," << p.v << "," << p.steer << "\n";
         }
         file.close();
         std::cout << "Trajectory saved to " << filename << std::endl;
@@ -112,8 +111,8 @@ int main(int argc, char** argv)
     // Step 2: Initialize vehicle pose at a starting point
     Pose vehiclePose;
     vehiclePose.x   = globalPath[0].x;
-    vehiclePose.y   = globalPath[0].y+1.0;
-    vehiclePose.yaw = globalPath[0].yaw;
+    vehiclePose.y   = globalPath[0].y + 0.5;
+    vehiclePose.yaw = globalPath[0].yaw + M_PI / 12;
 
     double dt = 0.1;
     Car car(vehiclePose);
@@ -122,28 +121,26 @@ int main(int argc, char** argv)
 
     // Step 3: Animate vehicle movement along the path using genLocalPathInter
     std::vector<std::vector<WayPoint>> data;
-    double totalTime   = 50.0;
+    double totalTime   = 150.0;
     double currentTime = 0.0;
     // for (size_t i = 0; i < globalPath.size() - 30; ++i)
     while (currentTime < totalTime)
     {
         currentTime += 0.1;
         // Use genLocalPathInter to get points with heading
-        std::vector<WayPoint> pointsWithHeading = lp.genLocalPathInter(car.pose, 2 * N, N, 0.1);
-
-        // Convert the generated local path back to global coordinates
-        std::vector<WayPoint> globalPathConverted = lp.convertLocalToGlobal(pointsWithHeading);
+        std::vector<WayPoint> localTrajectory = lp.genLocalPathInter(car.pose, 2 * N, N, 0.05);
 
         // Solve
         ControlSignal signal;
-        int success = controller.solve(car.pose, globalPathConverted, signal);
+        int success = controller.solve(car.pose, localTrajectory, signal);
 
         if (success == 0)
         {
             car.updateState(signal, dt);
         }
+        std::cout << signal.speed << " " << signal.steering << std::endl;
 
-        data.emplace_back(globalPathConverted);
+        data.emplace_back(localTrajectory);
     }
 
     // Save to CSV

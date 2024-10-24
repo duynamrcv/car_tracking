@@ -36,17 +36,16 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
 }
 
 // Function to save trajectory to CSV file
-void saveToCSV(const std::string& filename,
-               const std::vector<Pose>& motionPath)
+void saveToCSV(const std::string& filename, const std::vector<WayPoint>& motionPath)
 {
     std::ofstream file(filename);
 
     if (file.is_open())
     {
-        file << "x,y,yaw\n";  // CSV header
+        file << "x,y,yaw,v,steer\n";  // CSV header
         for (const auto& p : motionPath)
         {
-            file << p.x << "," << p.y << "," << p.yaw << "\n";
+            file << p.x << "," << p.y << "," << p.yaw << "," << p.v << "," << p.steer << "\n";
         }
         file.close();
         std::cout << "Trajectory saved to " << filename << std::endl;
