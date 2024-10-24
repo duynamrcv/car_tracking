@@ -1,5 +1,6 @@
 .vscode
 build/
+**/data.png
 **.csv
 **.json
 **/__pycache__

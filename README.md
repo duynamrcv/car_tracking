@@ -26,3 +26,6 @@ Run (build step already included in run script)
 ```
 ./scripts/run_example_<name>.sh
 ```
+
+## Results
+<img src="data/video.gif" alt="" width="80%"/> 
