@@ -28,4 +28,4 @@ Run (build step already included in run script)
 ```
 
 ## Results
-<img src="data/video.gif" alt="" width="80%"/> 
+<img src="data/video.gif" alt="" width="60%"/><img src="data/tracking.png" alt="" width="40%"/>

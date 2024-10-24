@@ -90,7 +90,7 @@ void saveToCSV(const std::string& filename,
 int main(int argc, char** argv)
 {
     // Step 1: Read global path from file
-    if (argc != 3)
+    if (argc != 4)
     {
         std::cout << "Usage: " << argv[0]
                   << " <input_reference> <output_local_path> <output_motion_path>\n";
@@ -142,7 +142,6 @@ int main(int argc, char** argv)
         {
             car.updateState(signal, dt);
         }
-        std::cout << signal.speed << " " << signal.steering << std::endl;
 
         data.emplace_back(globalPathConverted);
     }

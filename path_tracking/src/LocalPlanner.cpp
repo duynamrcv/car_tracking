@@ -64,6 +64,38 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
     return generatePointsWithHeading(coefficients, pose, numPoints, step);
 }
 
+std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePose,
+                                                           const int& numPoseAhead,
+                                                           const int& numPoints, const double& step)
+{
+    // FIXME: check carrefully to ensure the length of output
+    double smallStep = 0.01;
+
+    // number point dense static_cast
+    int numPointsDense = static_cast<int>(numPoints * step / smallStep);
+    auto allPoints     = genLocalPathInter(vehiclePose, numPoseAhead, numPointsDense, smallStep);
+
+    // check and select the point from all_points with distance equal step
+    std::vector<WayPoint> pointsWithHeading;
+    pointsWithHeading.push_back(allPoints[0]);
+    double distance = 0;
+    for (int i = 1; i < allPoints.size(); i++)
+    {
+        double x1 = allPoints[i].x;
+        double y1 = allPoints[i].y;
+        double x0 = pointsWithHeading.back().x;
+        double y0 = pointsWithHeading.back().y;
+        distance  = sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2));
+        if (distance >= step)
+        {
+            pointsWithHeading.push_back(allPoints[i]);
+            distance = 0;
+        }
+        if(allPoints.size() == numPoints) break;
+    }
+    return pointsWithHeading;
+}
+
 std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
 {
     std::vector<WayPoint> localPath;  // Ego waypoint
