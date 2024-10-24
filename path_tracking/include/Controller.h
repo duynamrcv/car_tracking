@@ -33,6 +33,7 @@ public:
     void setContraints(double maxV, double minV, double maxSteering, double minSteering);
     void setWeights(const double weight[NY]);
     void setParmeters(double wheelbase);
+    void setTimeStep(double timeStep);
 
     int solve(const Pose &currentPose, const std::vector<WayPoint> localTrajectory,
               ControlSignal &signal);
@@ -49,4 +50,5 @@ private:
     double parameter[NP];               // Parameter
     double W_[NY * NY], W_e_[NX * NX];  // Weight
     double lbu_[NU], ubu_[NU];          // Constraint
+    double timeStep_;                   // Time step
 };

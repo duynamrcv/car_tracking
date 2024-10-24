@@ -30,7 +30,9 @@ Controller::Controller()
     double minV        = 0.0;
     double maxSteering = M_PI / 4;
     double minSteering = -M_PI / 4;
+    double timeStep    = 0.1;
 
+    setTimeStep(timeStep);
     setParmeters(wheelbase);
     setWeights(weight);
     setContraints(maxV, minV, maxSteering, minSteering);
@@ -80,6 +82,11 @@ void Controller::setWeights(const double weight[NY])
     W_e_[2 + (NX)*2] = weight[2];
 }
 
+void Controller::setTimeStep(double timeStep)
+{
+    timeStep_ = timeStep;
+}
+
 int Controller::solve(const Pose& currentPose, const std::vector<WayPoint> localTrajectory,
                       ControlSignal& signal)
 {
@@ -101,6 +108,7 @@ int Controller::solve(const Pose& currentPose, const std::vector<WayPoint> local
             state[2] = localTrajectory[i].yaw;
             state[3] = localTrajectory[i].v;
             state[4] = localTrajectory[i].steer;
+            ocp_nlp_in_set(nlpConfig_, nlpDims_, nlpIn_, i, "Ts", &timeStep_);
             ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "yref", state);
             ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "W", W_);
             ocp_nlp_constraints_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "lbu", lbu_);
