@@ -5,6 +5,6 @@ wheel_base: 2.95 # m
 
 # System limitation
 max_velocity: 1.5 # m/s
-max_steering: 30. # deg/s
-
-# Acados config
+max_steering: 30. # deg
+max_acceleration: 1.0 # m/s2
+max_rating: 45 # deg/s

@@ -16,11 +16,17 @@ class Car:
         self.state = state
 
         # Define the constraints
+        self.e_y = 0.5
         self.wheelbase = config['wheel_base']
         self.max_v = config['max_velocity']
-        self.min_v = -self.max_v
+        self.max_a = config['max_acceleration']
         self.max_steer = np.deg2rad(config['max_steering'])
+        self.max_delta = np.deg2rad(config['max_rating'])
+        
+        self.min_v = -self.max_v
+        self.min_a = -self.max_a
         self.min_steer = -self.max_steer
+        self.min_delta = -self.max_delta
 
         # Initial path
         self.stamp = 0
@@ -28,29 +34,17 @@ class Car:
 
     def f_dynamic(self, state:np.array, control:np.array):
         return np.array([
-            control[0] * np.cos(state[2]),
-            control[0] * np.sin(state[2]),
-            control[0] * np.tan(control[1]) / self.wheelbase
+            state[3] * np.cos(state[2]),
+            state[3] * np.sin(state[2]),
+            state[3] * np.tan(state[4]) / self.wheelbase,
+            control[0],
+            control[1]
         ])
 
     def update_state(self, control, dt):
-        method = 1
-        if method == 0:
-            # Using Runge-Kutta 4
-            p = self.state
-            k1 = self.f_dynamic(p, control)
-            p_aux = p + k1 * dt / 2
-            k2 = self.f_dynamic(p_aux, control)
-            p_aux = p + k2 * dt / 2
-            k3 = self.f_dynamic(p_aux, control)
-            p_aux = p + k3 * dt
-            k4 = self.f_dynamic(p_aux, control)
-
-            self.state = p + (k1 + 2 * k2 + 2 * k3 + k4 ) / 6.0 * dt
-        else:
-            # Using Euler
-            p = self.state
-            self.state = p + self.f_dynamic(p, control) * dt
+        # Using Euler
+        p = self.state
+        self.state = p + self.f_dynamic(p, control) * dt
 
         self.stamp += dt
         self.path.append(np.concatenate([[self.stamp], self.state]))

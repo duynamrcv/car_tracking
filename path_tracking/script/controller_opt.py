@@ -22,15 +22,17 @@ class Controller:
 
     def acados_setup_model(self, model_name):
         # Control inputs
-        v = ca.SX.sym('v')
-        steer = ca.SX.sym('delta')
-        controls = ca.vertcat(v, steer)
+        a = ca.SX.sym('a')
+        delta = ca.SX.sym('delta')
+        controls = ca.vertcat(a, delta)
 
         # States
         x = ca.SX.sym('x')
         y = ca.SX.sym('y')
         yaw = ca.SX.sym('yaw')
-        states = ca.vertcat(x, y, yaw)
+        v = ca.SX.sym('v')
+        steer = ca.SX.sym('steer')
+        states = ca.vertcat(x, y, yaw, v, steer)
 
         # Parameters
         L = ca.SX.sym('wheelbase')
@@ -44,7 +46,9 @@ class Controller:
 
         f_expl = ca.vertcat(v * ca.cos(yaw),
                             v * ca.sin(yaw),
-                            v * ca.tan(steer) / L)
+                            v * ca.tan(steer) / L,
+                            a,
+                            delta)
         f_impl = states_dot - f_expl
 
         # model configuration
@@ -96,8 +100,12 @@ class Controller:
 
         # Set constraints
         ocp.constraints.x0 = np.zeros(nx)
-        ocp.constraints.lbu = np.array([self.car.min_v, self.car.min_steer])
-        ocp.constraints.ubu = np.array([self.car.max_v, self.car.max_steer])
+        ocp.constraints.lbx = np.array([-self.car.e_y, self.car.min_v, self.car.min_steer])
+        ocp.constraints.ubx = np.array([ self.car.e_y, self.car.max_v, self.car.max_steer])
+        ocp.constraints.idxbx = np.array([1, 3, 4])
+
+        ocp.constraints.lbu = np.array([self.car.min_a, self.car.min_delta])
+        ocp.constraints.ubu = np.array([self.car.max_a, self.car.max_delta])
         ocp.constraints.idxbu = np.array([0, 1])
 
         # Set QP solver and integration
