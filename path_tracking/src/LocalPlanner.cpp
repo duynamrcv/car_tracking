@@ -1,6 +1,6 @@
 #include "LocalPlanner.h"
 
-LocalPlanner::LocalPlanner(const std::vector<WayPoint>& globalPath, const Pose& pose,
+LocalPlanner::LocalPlanner(const std::vector<Pose>& globalPath, const Pose& pose,
                            const int order)
 {
     globalPath_   = globalPath;
@@ -36,7 +36,7 @@ void LocalPlanner::findClosestWaypointAhead()
     }
 }
 
-std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
+std::vector<Pose> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
                                                       const int& numPoseAhead, const int& numPoints,
                                                       const double& step)
 {
@@ -44,11 +44,11 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
     updateVehiclePose(vehiclePose);
 
     // Get the local path ahead of the vehicle using the specified number of poses
-    std::vector<WayPoint> localPathAhead = getLocalPathAhead(numPoseAhead);
+    std::vector<Pose> localPathAhead = getLocalPathAhead(numPoseAhead);
     if (localPathAhead.size() < numPoseAhead)
     {
         // TODO: add as end point
-        std::vector<WayPoint> localTrajectory;
+        std::vector<Pose> localTrajectory;
         for (int i = 0; i < numPoints; i++)
         {
             int index = vehicleIndex_ + i;
@@ -74,7 +74,7 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
         pose.x   = 0.0;
         pose.y   = 0.0;
         pose.yaw = 0.0;
-        std::vector<WayPoint> pointsWithHeading =
+        std::vector<Pose> pointsWithHeading =
             generatePointsWithHeading(coefficients, pose, numPoints, step);
 
         // Convert the generated local path back to global coordinates
@@ -82,7 +82,7 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInter(const Pose& vehiclePose,
     }
 }
 
-std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePose,
+std::vector<Pose> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePose,
                                                            const int& numPoseAhead,
                                                            const int& numPoints, const double& step)
 {
@@ -94,7 +94,7 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePo
     auto allPoints     = genLocalPathInter(vehiclePose, numPoseAhead, numPointsDense, smallStep);
 
     // check and select the point from all_points with distance equal step
-    std::vector<WayPoint> pointsWithHeading;
+    std::vector<Pose> pointsWithHeading;
     pointsWithHeading.push_back(allPoints[0]);
     double distance = 0;
     for (int i = 1; i < allPoints.size(); i++)
@@ -114,9 +114,9 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePo
     return pointsWithHeading;
 }
 
-std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
+std::vector<Pose> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
 {
-    std::vector<WayPoint> localPath;  // Ego waypoint
+    std::vector<Pose> localPath;  // Ego waypoint
 
     findClosestWaypointAhead();
     for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoseAhead && i < globalPath_.size(); ++i)
@@ -125,7 +125,7 @@ std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
         const double dy = globalPath_[i].y - vehiclePose_.y;
 
         // Convert global coordinates to local coordinates
-        WayPoint wp;
+        Pose wp;
         wp.x     = dx * cos(-vehiclePose_.yaw) - dy * sin(-vehiclePose_.yaw);
         wp.y     = dx * sin(-vehiclePose_.yaw) + dy * cos(-vehiclePose_.yaw);
         wp.yaw   = normalizeAngle(globalPath_[i].yaw - vehiclePose_.yaw);
@@ -144,9 +144,9 @@ std::vector<WayPoint> LocalPlanner::getLocalPathAhead(const int& numPoseAhead)
     return localPath;
 }
 
-std::vector<WayPoint> LocalPlanner::getGlobalPathAhead(const int& numPoseAhead)
+std::vector<Pose> LocalPlanner::getGlobalPathAhead(const int& numPoseAhead)
 {
-    std::vector<WayPoint> globalPathAhead;
+    std::vector<Pose> globalPathAhead;
 
     findClosestWaypointAhead();
     for (size_t i = vehicleIndex_; i < vehicleIndex_ + numPoseAhead && i < globalPath_.size(); ++i)
@@ -164,13 +164,13 @@ std::vector<WayPoint> LocalPlanner::getGlobalPathAhead(const int& numPoseAhead)
     return globalPathAhead;
 }
 
-std::vector<WayPoint> LocalPlanner::convertLocalToGlobal(
-    const std::vector<WayPoint>& localTrajectory)
+std::vector<Pose> LocalPlanner::convertLocalToGlobal(
+    const std::vector<Pose>& localTrajectory)
 {
-    std::vector<WayPoint> globalTrajectory;
-    for (const WayPoint& point : localTrajectory)
+    std::vector<Pose> globalTrajectory;
+    for (const Pose& point : localTrajectory)
     {
-        WayPoint wp;
+        Pose wp;
         wp.x   = vehiclePose_.x + point.x * cos(vehiclePose_.yaw) - point.y * sin(vehiclePose_.yaw);
         wp.y   = vehiclePose_.y + point.x * sin(vehiclePose_.yaw) + point.y * cos(vehiclePose_.yaw);
         wp.yaw = normalizeAngle(point.yaw + vehiclePose_.yaw);
@@ -264,14 +264,14 @@ Eigen::VectorXd LocalPlanner::fitPolynomial(const std::vector<Eigen::Vector2d>& 
     return finalCoefficients;
 }
 
-std::vector<WayPoint> LocalPlanner::generatePointsWithHeading(const Eigen::VectorXd& coefficient,
+std::vector<Pose> LocalPlanner::generatePointsWithHeading(const Eigen::VectorXd& coefficient,
                                                               const Pose& currentPose,
                                                               const int& numPoints,
                                                               const double& step)
 {
-    std::vector<WayPoint> localTrajectory;
+    std::vector<Pose> localTrajectory;
     // Save the first point to ego point
-    WayPoint wp;
+    Pose wp;
     wp.x     = currentPose.x;
     wp.y     = currentPose.y;
     wp.yaw   = currentPose.yaw;
@@ -286,7 +286,7 @@ std::vector<WayPoint> LocalPlanner::generatePointsWithHeading(const Eigen::Vecto
         const double dy_dx = evaluateDerivative(coefficient, x);
         const double yaw   = atan(dy_dx);  // Heading angle in radians
 
-        WayPoint wp;
+        Pose wp;
         wp.x     = x;
         wp.y     = y;
         wp.yaw   = yaw;

@@ -36,13 +36,13 @@
 #include "acados_c/ocp_nlp_interface.h"
 #include "acados_c/external_function_interface.h"
 
-#define CARMODEL_NX     3
+#define CARMODEL_NX     5
 #define CARMODEL_NZ     0
 #define CARMODEL_NU     2
 #define CARMODEL_NP     1
 #define CARMODEL_NP_GLOBAL     0
-#define CARMODEL_NBX    0
-#define CARMODEL_NBX0   3
+#define CARMODEL_NBX    2
+#define CARMODEL_NBX0   5
 #define CARMODEL_NBU    2
 #define CARMODEL_NSBX   0
 #define CARMODEL_NSBU   0
@@ -61,9 +61,9 @@
 #define CARMODEL_NG     0
 #define CARMODEL_NBXN   0
 #define CARMODEL_NGN    0
-#define CARMODEL_NY0    5
-#define CARMODEL_NY     5
-#define CARMODEL_NYN    3
+#define CARMODEL_NY0    7
+#define CARMODEL_NY     7
+#define CARMODEL_NYN    5
 #define CARMODEL_N      20
 #define CARMODEL_NH     0
 #define CARMODEL_NHN    0

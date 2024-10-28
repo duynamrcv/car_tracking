@@ -238,7 +238,7 @@ static ocp_nlp_dims* CarModel_acados_create_setup_dimensions(CarModel_solver_cap
     nbx[0] = NBX0;
     nsbx[0] = 0;
     ns[0] = NS0;
-    nbxe[0] = 3;
+    nbxe[0] = 5;
     ny[0] = NY0;
     nh[0] = NH0;
     nsh[0] = NSH0;
@@ -424,11 +424,13 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
 
    double* W_0 = calloc(NY0*NY0, sizeof(double));
     // change only the non-zero elements:
-    W_0[0+(NY0) * 0] = 10;
-    W_0[1+(NY0) * 1] = 10;
+    W_0[0+(NY0) * 0] = 100;
+    W_0[1+(NY0) * 1] = 100;
     W_0[2+(NY0) * 2] = 0.01;
-    W_0[3+(NY0) * 3] = 0.1;
-    W_0[4+(NY0) * 4] = 0.1;
+    W_0[3+(NY0) * 3] = 1;
+    W_0[4+(NY0) * 4] = 1;
+    W_0[5+(NY0) * 5] = 0.1;
+    W_0[6+(NY0) * 6] = 0.1;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "W", W_0);
     free(W_0);
     double* Vx_0 = calloc(NY0*NX, sizeof(double));
@@ -436,12 +438,14 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     Vx_0[0+(NY0) * 0] = 1;
     Vx_0[1+(NY0) * 1] = 1;
     Vx_0[2+(NY0) * 2] = 1;
+    Vx_0[3+(NY0) * 3] = 1;
+    Vx_0[4+(NY0) * 4] = 1;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "Vx", Vx_0);
     free(Vx_0);
     double* Vu_0 = calloc(NY0*NU, sizeof(double));
     // change only the non-zero elements:
-    Vu_0[3+(NY0) * 0] = 1;
-    Vu_0[4+(NY0) * 1] = 1;
+    Vu_0[5+(NY0) * 0] = 1;
+    Vu_0[6+(NY0) * 1] = 1;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, 0, "Vu", Vu_0);
     free(Vu_0);
     double* yref = calloc(NY, sizeof(double));
@@ -454,11 +458,13 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     free(yref);
     double* W = calloc(NY*NY, sizeof(double));
     // change only the non-zero elements:
-    W[0+(NY) * 0] = 10;
-    W[1+(NY) * 1] = 10;
+    W[0+(NY) * 0] = 100;
+    W[1+(NY) * 1] = 100;
     W[2+(NY) * 2] = 0.01;
-    W[3+(NY) * 3] = 0.1;
-    W[4+(NY) * 4] = 0.1;
+    W[3+(NY) * 3] = 1;
+    W[4+(NY) * 4] = 1;
+    W[5+(NY) * 5] = 0.1;
+    W[6+(NY) * 6] = 0.1;
 
     for (int i = 1; i < N; i++)
     {
@@ -470,6 +476,8 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     Vx[0+(NY) * 0] = 1;
     Vx[1+(NY) * 1] = 1;
     Vx[2+(NY) * 2] = 1;
+    Vx[3+(NY) * 3] = 1;
+    Vx[4+(NY) * 4] = 1;
     for (int i = 1; i < N; i++)
     {
         ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "Vx", Vx);
@@ -479,8 +487,8 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     
     double* Vu = calloc(NY*NU, sizeof(double));
     // change only the non-zero elements:
-    Vu[3+(NY) * 0] = 1;
-    Vu[4+(NY) * 1] = 1;
+    Vu[5+(NY) * 0] = 1;
+    Vu[6+(NY) * 1] = 1;
 
     for (int i = 1; i < N; i++)
     {
@@ -494,9 +502,11 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
 
     double* W_e = calloc(NYN*NYN, sizeof(double));
     // change only the non-zero elements:
-    W_e[0+(NYN) * 0] = 10;
-    W_e[1+(NYN) * 1] = 10;
+    W_e[0+(NYN) * 0] = 100;
+    W_e[1+(NYN) * 1] = 100;
     W_e[2+(NYN) * 2] = 0.01;
+    W_e[3+(NYN) * 3] = 1;
+    W_e[4+(NYN) * 4] = 1;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "W", W_e);
     free(W_e);
     double* Vx_e = calloc(NYN*NX, sizeof(double));
@@ -504,6 +514,8 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     Vx_e[0+(NYN) * 0] = 1;
     Vx_e[1+(NYN) * 1] = 1;
     Vx_e[2+(NYN) * 2] = 1;
+    Vx_e[3+(NYN) * 3] = 1;
+    Vx_e[4+(NYN) * 4] = 1;
     ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, N, "Vx", Vx_e);
     free(Vx_e);
 
@@ -520,6 +532,8 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     idxbx0[0] = 0;
     idxbx0[1] = 1;
     idxbx0[2] = 2;
+    idxbx0[3] = 3;
+    idxbx0[4] = 4;
 
     double* lubx0 = calloc(2*NBX0, sizeof(double));
     double* lbx0 = lubx0;
@@ -532,10 +546,12 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     free(idxbx0);
     free(lubx0);
     // idxbxe_0
-    int* idxbxe_0 = malloc(3 * sizeof(int));
+    int* idxbxe_0 = malloc(5 * sizeof(int));
     idxbxe_0[0] = 0;
     idxbxe_0[1] = 1;
     idxbxe_0[2] = 2;
+    idxbxe_0[3] = 3;
+    idxbxe_0[4] = 4;
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "idxbxe", idxbxe_0);
     free(idxbxe_0);
 
@@ -554,10 +570,10 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
     double* lubu = calloc(2*NBU, sizeof(double));
     double* lbu = lubu;
     double* ubu = lubu + NBU;
-    lbu[0] = -1.5;
-    ubu[0] = 1.5;
-    lbu[1] = -0.5235987755982988;
-    ubu[1] = 0.5235987755982988;
+    lbu[0] = -1;
+    ubu[0] = 1;
+    lbu[1] = -0.7853981633974483;
+    ubu[1] = 0.7853981633974483;
 
     for (int i = 0; i < N; i++)
     {
@@ -575,6 +591,26 @@ void CarModel_acados_setup_nlp_in(CarModel_solver_capsule* capsule, const int N,
 
 
 
+    // x
+    int* idxbx = malloc(NBX * sizeof(int));
+    idxbx[0] = 3;
+    idxbx[1] = 4;
+    double* lubx = calloc(2*NBX, sizeof(double));
+    double* lbx = lubx;
+    double* ubx = lubx + NBX;
+    lbx[0] = -1.5;
+    ubx[0] = 1.5;
+    lbx[1] = -0.6981317007977318;
+    ubx[1] = 0.6981317007977318;
+
+    for (int i = 1; i < N; i++)
+    {
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "idxbx", idxbx);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "lbx", lbx);
+        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "ubx", ubx);
+    }
+    free(idxbx);
+    free(lubx);
 
 
 

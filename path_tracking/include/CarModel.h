@@ -5,16 +5,7 @@
 
 struct Pose
 {
-    double x, y, yaw;
-};
-
-struct WayPoint
-{
-    double x;
-    double y;
-    double yaw;
-    double v;
-    double steer;
+    double x, y, yaw, v, steer;
 };
 
 struct ControlSignal
@@ -28,11 +19,13 @@ struct ControlSignal
 class Car
 {
 public:
-    Car(double x_, double y_, double yaw_)
+    Car(double x_, double y_, double yaw_, double v_, double steer_)
     {
-        pose.x   = x_;
-        pose.y   = y_;
-        pose.yaw = yaw_;
+        pose.x     = x_;
+        pose.y     = y_;
+        pose.yaw   = yaw_;
+        pose.v     = v_;
+        pose.steer = steer_;
     }
 
     Car(const Pose& pose_) { pose = pose_; }
@@ -41,21 +34,17 @@ public:
 
     void updateState(const ControlSignal& signal, double dt)
     {
-        pose.x   = pose.x + signal.speed * cos(pose.yaw) * dt;
-        pose.y   = pose.y + signal.speed * sin(pose.yaw) * dt;
-        pose.yaw = pose.yaw + signal.speed * tan(signal.steering) / wheelbase_ * dt;
+        pose.x     = pose.x + signal.speed * cos(pose.yaw) * dt;
+        pose.y     = pose.y + signal.speed * sin(pose.yaw) * dt;
+        pose.yaw   = pose.yaw + signal.speed * tan(signal.steering) / wheelbase_ * dt;
+        pose.v     = signal.speed;
+        pose.steer = signal.steering;
 
-        WayPoint wp;
-        wp.x     = pose.x;
-        wp.y     = pose.y;
-        wp.yaw   = pose.yaw;
-        wp.v     = signal.speed;
-        wp.steer = signal.steering;
-        motionPath.emplace_back(wp);
+        motionPath.emplace_back(pose);
     }
 
     Pose pose;
-    std::vector<WayPoint> motionPath;
+    std::vector<Pose> motionPath;
 
 private:
     double wheelbase_ = 2.95;

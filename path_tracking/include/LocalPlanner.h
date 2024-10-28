@@ -8,22 +8,22 @@
 class LocalPlanner
 {
 public:
-    LocalPlanner(const std::vector<WayPoint>& globalPath, const Pose& pose, const int order);
+    LocalPlanner(const std::vector<Pose>& globalPath, const Pose& pose, const int order);
     ~LocalPlanner();
 
     void updateVehiclePose(const Pose& pose);
     void findClosestWaypointAhead();
-    std::vector<WayPoint> getLocalPathAhead(const int& numPoseAhead);
-    std::vector<WayPoint> getGlobalPathAhead(const int& numPoseAhead);
-    std::vector<WayPoint> genLocalPathInter(const Pose& vehiclePose, const int& numPoseAhead,
+    std::vector<Pose> getLocalPathAhead(const int& numPoseAhead);
+    std::vector<Pose> getGlobalPathAhead(const int& numPoseAhead);
+    std::vector<Pose> genLocalPathInter(const Pose& vehiclePose, const int& numPoseAhead,
                                             const int& numPoints, const double& step);
-    std::vector<WayPoint> genLocalPathInterEqual(const Pose& vehiclePose, const int& numPoseAhead,
+    std::vector<Pose> genLocalPathInterEqual(const Pose& vehiclePose, const int& numPoseAhead,
                                                  const int& numPoints, const double& step);
-    std::vector<WayPoint> convertLocalToGlobal(const std::vector<WayPoint>& localTrajectory);
+    std::vector<Pose> convertLocalToGlobal(const std::vector<Pose>& localTrajectory);
 
 private:
     Eigen::VectorXd fitPolynomial(const std::vector<Eigen::Vector2d>& waypoints) const;
-    static std::vector<WayPoint> generatePointsWithHeading(const Eigen::VectorXd& coefficient,
+    static std::vector<Pose> generatePointsWithHeading(const Eigen::VectorXd& coefficient,
                                                            const Pose& currentPose,
                                                            const int& numPoints,
                                                            const double& step);
@@ -31,7 +31,7 @@ private:
     static double evaluatePolynomial(const Eigen::VectorXd& coefficients, const double& x);
     static double evaluateDerivative(const Eigen::VectorXd& coefficients, const double& x);
 
-    std::vector<WayPoint> globalPath_;
+    std::vector<Pose> globalPath_;
     Pose vehiclePose_;
     size_t vehicleIndex_;
     int order_;

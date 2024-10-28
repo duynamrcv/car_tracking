@@ -53,12 +53,12 @@ extern "C" {
 
 casadi_real casadi_sq(casadi_real x) { return x*x;}
 
-static const casadi_int casadi_s0[7] = {3, 1, 0, 3, 0, 1, 2};
+static const casadi_int casadi_s0[9] = {5, 1, 0, 5, 0, 1, 2, 3, 4};
 static const casadi_int casadi_s1[6] = {2, 1, 0, 2, 0, 1};
 static const casadi_int casadi_s2[5] = {1, 1, 0, 1, 0};
-static const casadi_int casadi_s3[9] = {5, 1, 0, 5, 0, 1, 2, 3, 4};
+static const casadi_int casadi_s3[11] = {7, 1, 0, 7, 0, 1, 2, 3, 4, 5, 6};
 
-/* CarModel_expl_vde_adj:(i0[3],i1[3],i2[2],i3)->(o0[5]) */
+/* CarModel_expl_vde_adj:(i0[5],i1[5],i2[2],i3)->(o0[7]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
   casadi_real a0, a1, a2, a3, a4, a5, a6, a7, a8;
   a0=0.;
@@ -66,7 +66,7 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   if (res[0]!=0) res[0][1]=a0;
   a0=arg[0]? arg[0][2] : 0;
   a1=cos(a0);
-  a2=arg[2]? arg[2][0] : 0;
+  a2=arg[0]? arg[0][3] : 0;
   a3=arg[1]? arg[1][1] : 0;
   a4=(a2*a3);
   a4=(a1*a4);
@@ -76,7 +76,7 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   a6=(a0*a6);
   a4=(a4-a6);
   if (res[0]!=0) res[0][2]=a4;
-  a4=arg[2]? arg[2][1] : 0;
+  a4=arg[0]? arg[0][4] : 0;
   a6=tan(a4);
   a7=arg[1]? arg[1][2] : 0;
   a8=arg[3]? arg[3][0] : 0;
@@ -92,6 +92,10 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   a4=casadi_sq(a4);
   a2=(a2/a4);
   if (res[0]!=0) res[0][4]=a2;
+  a2=arg[1]? arg[1][3] : 0;
+  if (res[0]!=0) res[0][5]=a2;
+  a2=arg[1]? arg[1][4] : 0;
+  if (res[0]!=0) res[0][6]=a2;
   return 0;
 }
 

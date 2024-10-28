@@ -23,6 +23,7 @@
 #define NBX0 CARMODEL_NBX0
 #define N    CARMODEL_N
 #define NBU  CARMODEL_NBU
+#define NBX  CARMODEL_NBX
 
 class Controller
 {
@@ -30,12 +31,13 @@ public:
     Controller();
     ~Controller();
 
-    void setContraints(double maxV, double minV, double maxSteering, double minSteering);
+    void setContraints(double maxV, double minV, double maxSteering, double minSteering,
+                       double maxA, double minA, double maxSteerRate, double minSteerRate);
     void setWeights(const double weight[NY]);
     void setParmeters(double wheelbase);
     void setTimeStep(double timeStep);
 
-    int solve(const Pose &currentPose, const std::vector<WayPoint> localTrajectory,
+    int solve(const Pose &currentPose, const std::vector<Pose> localTrajectory,
               ControlSignal &signal);
 
 private:
@@ -49,6 +51,7 @@ private:
 
     double parameter[NP];               // Parameter
     double W_[NY * NY], W_e_[NX * NX];  // Weight
-    double lbu_[NU], ubu_[NU];          // Constraint
+    double lbx_[NBX], ubx_[NBX];        // Constraint
+    double lbu_[NBU], ubu_[NBU];        // Constraint
     double timeStep_;                   // Time step
 };
