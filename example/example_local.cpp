@@ -8,7 +8,7 @@
 #include "Controller.h"
 #include "LocalPlanner.h"
 
-bool loadBasementData(std::string path, std::vector<WayPoint>& points)
+bool loadBasementData(std::string path, std::vector<Pose>& points)
 {
     if (!std::filesystem::exists(path)) return false;
 
@@ -30,7 +30,7 @@ bool loadBasementData(std::string path, std::vector<WayPoint>& points)
             sample.push_back(std::stod(token));  // Add each token to the result vector
         }
 
-        WayPoint wp;
+        Pose wp;
         wp.x     = sample[0];
         wp.y     = sample[1];
         wp.yaw   = sample[2];
@@ -42,16 +42,16 @@ bool loadBasementData(std::string path, std::vector<WayPoint>& points)
 }
 
 // Function to save trajectory to CSV file
-void saveToCSV(const std::string& filename, const std::vector<std::vector<WayPoint>>& data)
+void saveToCSV(const std::string& filename, const std::vector<std::vector<Pose>>& data)
 {
     std::ofstream file(filename);
 
     if (file.is_open())
     {
         // file << "x,y,yaw\n";  // CSV header
-        for (const std::vector<WayPoint>& path : data)
+        for (const std::vector<Pose>& path : data)
         {
-            for (const WayPoint& p : path)
+            for (const Pose& p : path)
             {
                 file << p.x << " " << p.y << " " << p.yaw << " ";
             }
@@ -66,7 +66,7 @@ void saveToCSV(const std::string& filename, const std::vector<std::vector<WayPoi
     }
 }
 
-void saveToCSV(const std::string& filename, const std::vector<WayPoint>& motionPath)
+void saveToCSV(const std::string& filename, const std::vector<Pose>& motionPath)
 {
     std::ofstream file(filename);
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     std::string localPath     = argv[2];
     std::string motionPath    = argv[3];
 
-    std::vector<WayPoint> globalPath;
+    std::vector<Pose> globalPath;
     bool isLoad = loadBasementData(referencePath, globalPath);
 
     if (!isLoad)
@@ -110,9 +110,11 @@ int main(int argc, char** argv)
 
     // Step 2: Initialize vehicle pose at a starting point
     Pose vehiclePose;
-    vehiclePose.x   = globalPath[0].x;
-    vehiclePose.y   = globalPath[0].y + 0.5;
-    vehiclePose.yaw = globalPath[0].yaw + M_PI / 12;
+    vehiclePose.x     = globalPath[0].x;
+    vehiclePose.y     = globalPath[0].y + 0.5;
+    vehiclePose.yaw   = globalPath[0].yaw + M_PI / 12;
+    vehiclePose.v     = 0.0;
+    vehiclePose.steer = 0.0;
 
     double dt = 0.1;
     Car car(vehiclePose);
@@ -120,7 +122,7 @@ int main(int argc, char** argv)
     LocalPlanner lp(globalPath, car.pose, 3);
 
     // Step 3: Animate vehicle movement along the path using genLocalPathInter
-    std::vector<std::vector<WayPoint>> data;
+    std::vector<std::vector<Pose>> data;
     double totalTime   = 150.0;
     double currentTime = 0.0;
     // for (size_t i = 0; i < globalPath.size() - 30; ++i)
@@ -128,7 +130,7 @@ int main(int argc, char** argv)
     {
         currentTime += 0.1;
         // Use genLocalPathInter to get points with heading
-        std::vector<WayPoint> localTrajectory = lp.genLocalPathInter(car.pose, 2 * N, N, 0.05);
+        std::vector<Pose> localTrajectory = lp.genLocalPathInter(car.pose, 2 * N, N, 0.1);
 
         // Solve
         ControlSignal signal;
@@ -141,6 +143,10 @@ int main(int argc, char** argv)
         std::cout << signal.speed << " " << signal.steering << std::endl;
 
         data.emplace_back(localTrajectory);
+
+        // Check goal
+        Pose finalPose = globalPath.back();
+        if (sqrt(pow(finalPose.x - car.pose.x, 2) + pow(finalPose.y - car.pose.y, 2)) < 0.1) break;
     }
 
     // Save to CSV

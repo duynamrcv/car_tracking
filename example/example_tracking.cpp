@@ -36,7 +36,7 @@ bool loadBasementData(std::string path, std::vector<std::tuple<double, double, d
 }
 
 // Function to save trajectory to CSV file
-void saveToCSV(const std::string& filename, const std::vector<WayPoint>& motionPath)
+void saveToCSV(const std::string& filename, const std::vector<Pose>& motionPath)
 {
     std::ofstream file(filename);
 
@@ -57,7 +57,7 @@ void saveToCSV(const std::string& filename, const std::vector<WayPoint>& motionP
 }
 
 void getLocalTrajectory(const std::vector<std::tuple<double, double, double>>& points, int iter,
-                        std::vector<WayPoint>& localTrajectory)
+                        std::vector<Pose>& localTrajectory)
 {
     for (int j = 0; j < N; j++)
     {
@@ -66,7 +66,7 @@ void getLocalTrajectory(const std::vector<std::tuple<double, double, double>>& p
         {
             index = points.size() - 1;
         }
-        WayPoint wp;
+        Pose wp;
         wp.x     = std::get<0>(points[index]);
         wp.y     = std::get<1>(points[index]);
         wp.yaw   = std::get<2>(points[index]);
@@ -96,13 +96,13 @@ int main(int argc, char** argv)
     }
 
     double dt = 0.1;
-    Car car(std::get<0>(points[0]), std::get<1>(points[0]), std::get<2>(points[0]));
+    Car car(std::get<0>(points[0]), std::get<1>(points[0]), std::get<2>(points[0]), 0., 0.);
     Controller controller;
 
     for (int i = 0; i < points.size(); i++)
     {
         // Collect reference data
-        std::vector<WayPoint> localTrajectory;
+        std::vector<Pose> localTrajectory;
         getLocalTrajectory(points, i, localTrajectory);
 
         // Solve
