@@ -33,7 +33,16 @@ def get_local_reference(reference, state, index, num_point):
         local_reference.append(np.array([x, y, yaw]))
     return np.array(local_reference)
 
-N = 30  # number of discretization steps
+def find_nearest_index(reference, state, index, num_points):
+    x = state[0]; y = state[1]
+    cx = reference[index:index+num_points,0]
+    cy = reference[index:index+num_points,1]
+    dx = x - cx; dy = y - cy
+    dist = np.hypot(dx, dy)
+    index += np.argmin(dist)
+    return index
+
+N = 20  # number of discretization steps
 T = 20.00  # maximum simulation time[s]
 dt = 0.1  # time step[s]
 
@@ -43,7 +52,7 @@ ref = load_trajectory(file_name)
 model_file = "/home/nambd3/spline_path/path_tracking/config/car_model.yaml"
 car = Car(np.array([ref[0,0], ref[0,1], ref[0,2], 0, 0]), model_file)
 controller = Controller(car, t_horizon=N*dt, n_nodes=N,
-                        q_cost=np.array([10., 10., 0.01, 1., 1.]), r_cost=np.array([0.1, 0.1])
+                        q_cost=np.array([100., 100., 0.01, 1., 1.]), r_cost=np.array([0.1, 0.1])
                         )
 
 wheelbase = car.wheelbase
@@ -52,9 +61,14 @@ p_value = np.array([car.wheelbase])
 time_record = []
 control_record = []
 current_time = 0
-for i in range(ref.shape[0]):
+i =0
+num_points_search = 40
+# for i in range(ref.shape[0]):
+while i < ref.shape[0]-1:
     x_current = car.state
     x_local = np.array([0,0,0,x_current[3],x_current[4]])
+
+    i = find_nearest_index(ref, x_current, i, num_points_search)
     local_ref = get_local_reference(ref, x_current, i, N+1)
 
     for j in range(N):

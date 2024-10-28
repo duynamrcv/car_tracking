@@ -100,9 +100,9 @@ class Controller:
 
         # Set constraints
         ocp.constraints.x0 = np.zeros(nx)
-        ocp.constraints.lbx = np.array([-self.car.e_y, self.car.min_v, self.car.min_steer])
-        ocp.constraints.ubx = np.array([ self.car.e_y, self.car.max_v, self.car.max_steer])
-        ocp.constraints.idxbx = np.array([1, 3, 4])
+        ocp.constraints.lbx = np.array([self.car.min_v, self.car.min_steer])
+        ocp.constraints.ubx = np.array([self.car.max_v, self.car.max_steer])
+        ocp.constraints.idxbx = np.array([3, 4])
 
         ocp.constraints.lbu = np.array([self.car.min_a, self.car.min_delta])
         ocp.constraints.ubu = np.array([self.car.max_a, self.car.max_delta])

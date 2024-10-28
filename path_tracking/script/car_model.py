@@ -16,7 +16,6 @@ class Car:
         self.state = state
 
         # Define the constraints
-        self.e_y = 0.5
         self.wheelbase = config['wheel_base']
         self.max_v = config['max_velocity']
         self.max_a = config['max_acceleration']
