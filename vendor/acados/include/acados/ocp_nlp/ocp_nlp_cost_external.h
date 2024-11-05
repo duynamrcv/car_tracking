@@ -55,6 +55,7 @@ typedef struct
     int nu;  // number of inputs
     int ns;  // number of slacks
     int np; // number of parameters
+    int np_global; // number of global parameters
 } ocp_nlp_cost_external_dims;
 
 //
@@ -165,6 +166,11 @@ typedef struct
 
 //
 acados_size_t ocp_nlp_cost_external_workspace_calculate_size(void *config, void *dims, void *opts);
+//
+size_t ocp_nlp_cost_external_get_external_fun_workspace_requirement(void *config_, void *dims_, void *opts_, void *model_);
+//
+void ocp_nlp_cost_external_set_external_fun_workspaces(void *config_, void *dims_, void *opts_, void *model_, void *workspace_);
+
 
 /************************************************
  * functions
