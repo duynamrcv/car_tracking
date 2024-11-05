@@ -1,4 +1,6 @@
 # Tracking controller for Autonomous Car
+This repository presents the implementation for autonomous car tracking with pre-drive path.
+
 ## Structure
 ```mermaid
 flowchart LR
@@ -11,13 +13,17 @@ flowchart LR
 
 ## Prequisites
 
-Install clang-format
+Install `clang-format`
 ```
-sudo apt install clang-format-10
-sudo ln -s /usr/bin/clang-format-10 /usr/local/bin/clang-format
+sudo apt install ninja-build
+sudo apt install build-essential
+sudo apt install clang-format-11
+sudo ln -s /usr/bin/clang-format-11 /usr/local/bin/clang-format
 ```
 
-Pre-commit: Check code format before push
+Install `acados`, please follow the following [instructions](https://docs.acados.org/installation/index.html)
+
+`Pre-commit`: Check code format before push
 ```
 pip install pre-commit
 pre-commit install
