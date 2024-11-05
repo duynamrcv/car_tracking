@@ -5,7 +5,7 @@ flowchart LR
     A[Path] --> B(Trajectory generation)
     B --> C{Local trajectory generation}
     C --> D[Controller]
-    C --> E[Autonomous Car]
+    D --> E[Autonomous Car]
     E --> C
 ```
 
