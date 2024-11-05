@@ -35,6 +35,10 @@ Run (build step already included in run script)
 ```
 ./scripts/run_example_<name>.sh
 ```
-
+Visualize results
+```
+python3 python/visual_path.py       # Plot tracking results
+python3 python/visual_animation.py  # Plot animation
+```
 ## Results
 <img src="data/video.gif" alt="" width="60%"/><img src="data/tracking.png" alt="" width="40%"/>
