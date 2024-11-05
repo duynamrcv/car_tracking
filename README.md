@@ -1,4 +1,13 @@
-# Spline path
+# Tracking controller for Autonomous Car
+## Structure
+```mermaid
+flowchart LR
+    A[Path] --> B(Trajectory generation)
+    B --> C{Local trajectory generation}
+    C --> D[Controller]
+    C --> E[Autonomous Car]
+    E --> C
+```
 
 ## Prequisites
 
