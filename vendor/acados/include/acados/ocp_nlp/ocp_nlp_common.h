@@ -145,10 +145,14 @@ typedef struct ocp_nlp_dims
     int *nv;  // number of primal variables (states+controls+slacks)
     int *nx;  // number of differential states
     int *nu;  // number of inputs
-    int *ni;  // number of two-sided inequality constraints: nb+ng+nh+ns
     int *nz;  // number of algebraic variables
     int *ns;  // number of slack variables
     int *np;  // number of parameters
+    // constraints
+    int *ni;  // number of two-sided inequality constraints: nb+ng+nh+ns+nphi
+    int *nb;  // number of two-sided bounds
+    int *ng;  // number of two-sided general linear constraints
+    int *ni_nl;  // number of two-sided nonlinear inequalities
 
     int np_global;  // number of global parameters
     int n_global_data;  // size of global_data; expressions that only depend on p_global; detected automatically during code generation
@@ -410,6 +414,9 @@ typedef struct ocp_nlp_memory
     struct blasfeo_dvec *dyn_adj;
 
     // optimal value gradient wrt params
+    struct blasfeo_dmat *jac_lag_stat_p_global;  // jacobian of stationarity condition wrt p_global (nv, np_global)
+    struct blasfeo_dmat *jac_ineq_p_global;  // jacobian of inequalities wrt p_global (2*ni, np_global)
+    struct blasfeo_dmat *jac_dyn_p_global;  // jacobian of dynamics wrt p_global (nx_next, np_global)
     struct blasfeo_dvec out_np_global;
 
     double cost_value;
@@ -464,7 +471,6 @@ typedef struct ocp_nlp_workspace
     struct blasfeo_dvec dxnext_dy;
 
     // optimal value gradient wrt params
-    struct blasfeo_dmat *tmp_nvninx_np_global;
     struct blasfeo_dvec tmp_np_global;
     // AS-RTI
     double *tmp_nv_double;
