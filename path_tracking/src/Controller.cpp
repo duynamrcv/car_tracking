@@ -116,28 +116,22 @@ int Controller::solve(const Pose& currentPose, const std::vector<WayPoint> local
         exit(1);
     }
 
-    for (size_t i = 0; i <= N; i++)
+    // set target states
+    for (size_t i = 0; i < N; i++)
     {
-        // set target states, costs and constraints
-        if (i < N)
-        {
-            double state[NX + NU];
-            state[0] = localTrajectory[i].x;
-            state[1] = localTrajectory[i].y;
-            state[2] = localTrajectory[i].yaw;
-            state[3] = localTrajectory[i].v;
-            state[4] = localTrajectory[i].steer;
-            ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "yref", state);
-        }
-        else
-        {
-            double stateN[NX];
-            stateN[0] = localTrajectory[N - 1].x;
-            stateN[1] = localTrajectory[N - 1].y;
-            stateN[2] = localTrajectory[N - 1].yaw;
-            ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, N, "yref", stateN);
-        }
+        double state[NX + NU];
+        state[0] = localTrajectory[i].x;
+        state[1] = localTrajectory[i].y;
+        state[2] = localTrajectory[i].yaw;
+        state[3] = localTrajectory[i].v;
+        state[4] = localTrajectory[i].steer;
+        ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, i, "yref", state);
     }
+    double stateN[NX];
+    stateN[0] = localTrajectory[N - 1].x;
+    stateN[1] = localTrajectory[N - 1].y;
+    stateN[2] = localTrajectory[N - 1].yaw;
+    ocp_nlp_cost_model_set(nlpConfig_, nlpDims_, nlpIn_, N, "yref", stateN);
 
     // set initial condition
     double initState[NX] = {currentPose.x, currentPose.y, currentPose.yaw};
