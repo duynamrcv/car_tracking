@@ -28,8 +28,8 @@ bool loadBasementData(std::string path, std::vector<Eigen::Vector2d>& points)
         {
             sample.push_back(std::stod(token));  // Add each token to the result vector
         }
-        
-        if((int)sample.back() == 1)
+
+        if ((int)sample.back() == 1)
         {
             Eigen::Vector2d point(sample[1], sample[2]);
             points.push_back(point);
@@ -59,6 +59,60 @@ void saveToCSV(const std::string& filename, const std::vector<WayPoint>& points)
     }
 }
 
+// Function to calculate the perpendicular distance from a point to a line
+double perpendicularDistance(const Eigen::Vector2d& p, const Eigen::Vector2d& lineStart,
+                             const Eigen::Vector2d& lineEnd)
+{
+    double num =
+        std::abs((lineEnd.y() - lineStart.y()) * p.x() - (lineEnd.x() - lineStart.x()) * p.y() +
+                 lineEnd.x() * lineStart.y() - lineEnd.y() * lineStart.x());
+    double den = std::sqrt(std::pow(lineEnd.y() - lineStart.y(), 2) +
+                           std::pow(lineEnd.x() - lineStart.x(), 2));
+    return num / den;
+}
+
+// Recursive Ramer-Douglas-Peucker algorithm
+void rdp(const std::vector<Eigen::Vector2d>& points, std::vector<Eigen::Vector2d>& result,
+         const double& epsilon = 0.1)
+{
+    if (points.size() < 2) return;
+
+    double maxDist = 0.0;
+    size_t index   = 0;
+
+    // Find the point with the maximum distance from the baseline
+    for (size_t i = 1; i < points.size() - 1; ++i)
+    {
+        double dist = perpendicularDistance(points[i], points.front(), points.back());
+        if (dist > maxDist)
+        {
+            index   = i;
+            maxDist = dist;
+        }
+    }
+
+    // If max distance is greater than epsilon, recursively simplify
+    if (maxDist > epsilon)
+    {
+        std::vector<Eigen::Vector2d> left(points.begin(), points.begin() + index + 1);
+        std::vector<Eigen::Vector2d> right(points.begin() + index, points.end());
+
+        std::vector<Eigen::Vector2d> resultLeft, resultRight;
+        rdp(left, resultLeft, epsilon);
+        rdp(right, resultRight, epsilon);
+
+        // Concatenate results (avoid duplicating the middle point)
+        result.assign(resultLeft.begin(), resultLeft.end() - 1);
+        result.insert(result.end(), resultRight.begin(), resultRight.end());
+    }
+    else
+    {
+        // If max distance is less than epsilon, simplify to a straight line
+        result.push_back(points.front());
+        result.push_back(points.back());
+    }
+}
+
 int main(int argc, char** argv)
 {
     if (argc != 4)
@@ -79,10 +133,13 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    double epsilon = 0.1;
+    rdp(points, points, epsilon);
+
     std::vector<WayPoint> trajectory;
-    double ds  = 0.1;  // Distance between consecutive points
+    double ds = 0.1;  // Distance between consecutive points
     SplineContext context;
-    if (method == 0)    // 0 - B Spline, 1 - Cubic Spline
+    if (method == 0)  // 0 - B Spline, 1 - Cubic Spline
     {
         BSpline spline;
         context.setStrategy(&spline);
