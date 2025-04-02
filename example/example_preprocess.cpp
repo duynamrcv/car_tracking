@@ -8,13 +8,15 @@
 #include "CubicSpline.h"
 #include "Spline.h"
 
-bool loadBasementData(std::string path, std::vector<Eigen::Vector2d>& points)
+bool loadBasementData(std::string path, std::vector<std::vector<Eigen::Vector2d>>& listPoints)
 {
     if (!std::filesystem::exists(path)) return false;
 
     std::ifstream data(path);
     std::string line;
     bool isCollect = true;
+    int prevGear   = 1;
+    std::vector<Eigen::Vector2d> points;
     while (data)
     {
         std::getline(data, line);
@@ -29,12 +31,25 @@ bool loadBasementData(std::string path, std::vector<Eigen::Vector2d>& points)
             sample.push_back(std::stod(token));  // Add each token to the result vector
         }
 
-        if ((int)sample.back() == 1)
+        int curGear = (int)sample.back();
+        if (curGear == prevGear || curGear == 0)
         {
             Eigen::Vector2d point(sample[1], sample[2]);
             points.push_back(point);
         }
+        else
+        {
+            Eigen::Vector2d point(sample[1], sample[2]);
+            std::cout << "Point: " << sample[1] << ", " << sample[2] << std::endl;
+            points.push_back(point);
+            listPoints.push_back(points);  // add points to the list
+
+            points.clear();
+            points.push_back(point);
+            prevGear = curGear;
+        }
     }
+    listPoints.push_back(points);  // add points to the list
     return true;
 }
 
@@ -125,34 +140,39 @@ int main(int argc, char** argv)
     int method                 = std::stoi(argv[1]);
     std::string basementPath   = argv[2];
     std::string trajectoryPath = argv[3];
-    std::vector<Eigen::Vector2d> points;
-    bool isLoad = loadBasementData(basementPath, points);
+    std::vector<std::vector<Eigen::Vector2d>> listPoints;
+    bool isLoad = loadBasementData(basementPath, listPoints);
     if (!isLoad)
     {
         std::cout << "Load file error\n";
         return -1;
     }
 
-    double epsilon = 0.1;
-    rdp(points, points, epsilon);
+    double epsilon = 0.05;
+    for (size_t i = 0; i < listPoints.size(); i++)
+    {
+        std::vector<Eigen::Vector2d> points = listPoints[i];
+        rdp(points, points, epsilon);
 
-    std::vector<WayPoint> trajectory;
-    double ds = 0.1;  // Distance between consecutive points
-    SplineContext context;
-    if (method == 0)  // 0 - B Spline, 1 - Cubic Spline
-    {
-        BSpline spline;
-        context.setStrategy(&spline);
-        std::cout << "Data length: " << points.size() << std::endl;
-        trajectory = context.interpolate(points, ds);
+        std::vector<WayPoint> trajectory;
+        double ds = 0.1;  // Distance between consecutive points
+        SplineContext context;
+        if (method == 0)  // 0 - B Spline, 1 - Cubic Spline
+        {
+            BSpline spline;
+            context.setStrategy(&spline);
+            std::cout << "Data length: " << points.size() << std::endl;
+            trajectory = context.interpolate(points, ds);
+        }
+        else
+        {
+            CubicSpline spline;
+            context.setStrategy(&spline);
+            std::cout << "Data length: " << points.size() << std::endl;
+            trajectory = context.interpolate(points, ds);
+        }
+        saveToCSV(trajectoryPath + std::to_string(i) + ".csv", trajectory);
     }
-    else
-    {
-        CubicSpline spline;
-        context.setStrategy(&spline);
-        std::cout << "Data length: " << points.size() << std::endl;
-        trajectory = context.interpolate(points, ds);
-    }
-    saveToCSV(trajectoryPath, trajectory);
+
     return 0;
 }

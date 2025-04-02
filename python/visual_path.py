@@ -43,8 +43,8 @@ if __name__ == "__main__":
     cy = df[:,1]
 
     plt.figure()
-    plt.plot(bx, by, "xb", label="basement")
-    plt.plot(x, y, "-or", label="BSpline")
+    plt.plot(bx, by, "xb", label="Sub-path 1")
+    plt.plot(x, y, "-or", label="Sub-path 2")
     plt.plot(cx, cy, "-og", label="Cubic Spline")
     plt.axis('scaled')
     plt.legend()
