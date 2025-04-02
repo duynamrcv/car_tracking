@@ -35,12 +35,9 @@ public:
         pose.yaw = yaw_;
     }
 
-    Car(const Pose& pose_)
-    {
-        pose = pose_;
-    }
+    Car(const Pose& pose_) { pose = pose_; }
 
-    ~Car(){};
+    ~Car() = default;
 
     void updateState(const ControlSignal& signal, double dt)
     {

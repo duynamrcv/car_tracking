@@ -1,4 +1,5 @@
 #include "LocalPlanner.h"
+#include "cmath"
 
 LocalPlanner::LocalPlanner(const std::vector<WayPoint>& globalPath, const Pose& pose,
                            const int order)
@@ -91,7 +92,7 @@ std::vector<WayPoint> LocalPlanner::genLocalPathInterEqual(const Pose& vehiclePo
             pointsWithHeading.push_back(allPoints[i]);
             distance = 0;
         }
-        if(allPoints.size() == numPoints) break;
+        if (allPoints.size() == numPoints) break;
     }
     return pointsWithHeading;
 }
@@ -278,13 +279,13 @@ std::vector<WayPoint> LocalPlanner::generatePointsWithHeading(const Eigen::Vecto
     }
     return localTrajectory;
 }
+
+// Map angle value in range (-pi, pi]
 double LocalPlanner::normalizeAngle(double angle)
 {
-    while (angle > M_PI)
-        angle -= 2.0 * M_PI;
-    while (angle < -M_PI)
-        angle += 2.0 * M_PI;
-    return angle;
+    angle = fmod(angle + M_PI, 2.0 * M_PI);
+    if (angle < 0) angle += 2.0 * M_PI;
+    return angle - M_PI;
 }
 
 double LocalPlanner::evaluatePolynomial(const Eigen::VectorXd& coefficients, const double& x)

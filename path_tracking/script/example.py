@@ -64,14 +64,14 @@ N = 20  # number of discretization steps
 T = 20.00  # maximum simulation time[s]
 dt = 0.1  # time step[s]
 
-file_name = "/home/duynam/car_tracking/data/reference.txt"
+file_name = "/home/nambd3/car_tracking/data/reference.txt"
 xref_pre, yref_pre, theta_ref_pre, dirs_pre = load_path(file_name)
 
 xref, yref, theta_ref, dirsref, xref2, yref2, theta_ref2, dirsref2 = gen_2sub_path(xref_pre, yref_pre, theta_ref_pre, dirs_pre)
 #xref1, yref1, theta_ref1, dirsref1, xref, yref, theta_ref, dirsref = gen_2sub_path(xref_pre, yref_pre, theta_ref_pre, dirs_pre)
 
 
-model_file = "/home/duynam/car_tracking/path_tracking/config/car_model.yaml"
+model_file = "/home/nambd3/car_tracking/path_tracking/config/car_model.yaml"
 car = Car(np.array([xref[0], yref[0], theta_ref[0]]), model_file)
 controller = Controller(car, t_horizon=N*dt, n_nodes=N,
                         q_cost=np.array([10., 10., 0.01]), r_cost=np.array([0.1, 0.1])
