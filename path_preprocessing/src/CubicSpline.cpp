@@ -1,9 +1,5 @@
 #include "CubicSpline.h"
 
-CubicSpline::CubicSpline() {}
-
-CubicSpline::~CubicSpline() {}
-
 std::vector<Eigen::Vector2d> CubicSpline::interpolate(const std::vector<Eigen::Vector2d>& points,
                                                       double ds)
 {

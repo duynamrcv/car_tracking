@@ -1,5 +1,4 @@
 #include "Spline1D.h"
-
 #include <algorithm>  // For std::upper_bound
 
 Spline1D::Spline1D(const std::vector<double>& x, const std::vector<double>& y) : x_(x), y_(y)

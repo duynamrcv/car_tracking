@@ -6,8 +6,8 @@
 class CubicSpline : public Spline
 {
 public:
-    CubicSpline();
-    ~CubicSpline();
+    CubicSpline()  = default;
+    ~CubicSpline() = default;
 
     std::vector<Eigen::Vector2d> interpolate(const std::vector<Eigen::Vector2d>& points, double ds);
 

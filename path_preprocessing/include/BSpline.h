@@ -6,9 +6,11 @@ class BSpline : public Spline
 {
 public:
     BSpline();
-    ~BSpline();
+    ~BSpline() = default;
 
-    virtual std::vector<Eigen::Vector2d> interpolate(const std::vector<Eigen::Vector2d>& points, double ds);
+    virtual std::vector<Eigen::Vector2d> interpolate(const std::vector<Eigen::Vector2d>& points,
+                                                     double ds);
+
 private:
     double B(int i, int k, double t, const std::vector<double>& knots);
     std::vector<double> generateKnotVector(int numPoints);

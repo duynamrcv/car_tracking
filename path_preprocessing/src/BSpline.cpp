@@ -4,7 +4,6 @@ BSpline::BSpline()
 {
     degree_ = 3;
 }
-BSpline::~BSpline() {}
 
 std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vector2d>& points,
                                                   double ds)
