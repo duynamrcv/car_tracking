@@ -150,6 +150,7 @@ int main(int argc, char** argv)
 
     double epsilon = 0.05;
     WayPoint lastWP;
+    std::vector<WayPoint> fullTrajectory;
     for (size_t i = 0; i < listPoints.size(); i++)
     {
         std::vector<Eigen::Vector2d> points = listPoints[i];
@@ -180,7 +181,9 @@ int main(int argc, char** argv)
         if (i != 0) trajectory.insert(trajectory.begin(), lastWP);
         lastWP = trajectory[trajectory.size() - 1];
         saveToCSV(trajectoryPath + std::to_string(i) + ".csv", trajectory);
+        fullTrajectory.insert(fullTrajectory.end(), trajectory.begin(), trajectory.end());
     }
+    saveToCSV(trajectoryPath + ".csv", fullTrajectory);
 
     return 0;
 }

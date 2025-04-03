@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-ref_file = "data/trajectory0.csv"
+ref_file = "data/trajectory.csv"
 df = pd.read_csv(ref_file, sep=',')
 df = np.array(df)
 
