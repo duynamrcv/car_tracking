@@ -5,7 +5,8 @@ BSpline::BSpline()
     degree_ = 3;
 }
 
-std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vector2d>& points, double ds)
+std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vector2d>& points,
+                                                  double ds)
 {
     if (points.size() <= degree_)
     {
@@ -15,8 +16,8 @@ std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vecto
     std::vector<double> knots = generateKnotVector(points.size());
     std::vector<Eigen::Vector2d> splinePoints;
 
-    double t = knots[degree_];  // Start from the first valid knot
-    double totalArcLength = 0.0;
+    double t                  = knots[degree_];  // Start from the first valid knot
+    double totalArcLength     = 0.0;
     Eigen::Vector2d prevPoint = points.front();
 
     double baselineLength = computeBaselineDistance(points);
@@ -26,7 +27,7 @@ std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vecto
     }
 
     double step = ds / (20 * baselineLength);
-    step = std::max(step, 1e-5);  // Prevent step from being too small
+    step        = std::max(step, 1e-5);  // Prevent step from being too small
 
     while (t <= knots[knots.size() - degree_ - 1])  // Traverse valid t-range
     {
@@ -48,6 +49,7 @@ std::vector<Eigen::Vector2d> BSpline::interpolate(const std::vector<Eigen::Vecto
         t += step;
     }
 
+    splinePoints.push_back(points[points.size() - 1]);
     return splinePoints;
 }
 
@@ -59,7 +61,7 @@ double BSpline::B(int i, int k, double t, const std::vector<double>& knots)
     }
 
     double left = 0.0, right = 0.0;
-    
+
     double denominator_left = knots[i + k] - knots[i];
     if (denominator_left > 1e-9)
     {

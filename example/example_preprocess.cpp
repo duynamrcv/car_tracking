@@ -15,7 +15,7 @@ bool loadBasementData(std::string path, std::vector<std::vector<Eigen::Vector2d>
     std::ifstream data(path);
     std::string line;
     bool isCollect = true;
-    int prevGear   = 1;
+    int prevGear   = 0;
     std::vector<Eigen::Vector2d> points;
     while (data)
     {
@@ -32,15 +32,15 @@ bool loadBasementData(std::string path, std::vector<std::vector<Eigen::Vector2d>
         }
 
         int curGear = (int)sample.back();
-        if (curGear == prevGear || curGear == 0)
+        if (curGear == prevGear || prevGear == 0)
         {
             Eigen::Vector2d point(sample[1], sample[2]);
             points.push_back(point);
+            if (prevGear == 0) prevGear = curGear;
         }
         else
         {
             Eigen::Vector2d point(sample[1], sample[2]);
-            std::cout << "Point: " << sample[1] << ", " << sample[2] << std::endl;
             points.push_back(point);
             listPoints.push_back(points);  // add points to the list
 
@@ -149,10 +149,15 @@ int main(int argc, char** argv)
     }
 
     double epsilon = 0.05;
+    WayPoint lastWP;
     for (size_t i = 0; i < listPoints.size(); i++)
     {
         std::vector<Eigen::Vector2d> points = listPoints[i];
+
         rdp(points, points, epsilon);
+        printf("Start point: (%f, %f)\n", points[0].x(), points[0].y());
+        printf("Last point: (%f, %f)\n", points[points.size() - 1].x(),
+               points[points.size() - 1].y());
 
         std::vector<WayPoint> trajectory;
         double ds = 0.1;  // Distance between consecutive points
@@ -171,6 +176,9 @@ int main(int argc, char** argv)
             std::cout << "Data length: " << points.size() << std::endl;
             trajectory = context.interpolate(points, ds);
         }
+
+        if (i != 0) trajectory.insert(trajectory.begin(), lastWP);
+        lastWP = trajectory[trajectory.size() - 1];
         saveToCSV(trajectoryPath + std::to_string(i) + ".csv", trajectory);
     }
 
